@@ -3,7 +3,6 @@
 	<head>
 	<title>Radlands</title>
 	<link rel="icon" type="image/x-icon" href="/favicon.ico">
-	<meta name="viewport" content="user-scalable=no"/>
 	<style>
 	html, body {
 		overscroll-behavior-x: none;
@@ -27,18 +26,6 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="seedrandom.js"></script>
 	<script src="rad.js"></script>
-	<script>
-	var socket = io();
-	
-	// do below to send a message
-	// first param is message type, second is message data
-	//socket.emit('msg', "test");
-	
-	socket.on('msg', function(msg) {
-		var game_state = JSON.parse(msg);
-		ApplyGameState(game_state);
-	});
-	</script>
 	</head>
 	<body onload="main()" style="margin:0px;overflow:hidden">
 		<canvas id="myCanvas" width="1669" height="933" style="display:none;"></canvas>

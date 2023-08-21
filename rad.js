@@ -1,20 +1,21 @@
 /*
 TODOs
 
-visualize not ready with the not ready symbol
 fix problem of non-turn player not being able to restore the same state until turn player does something
-show log behind hovered card
-within-turn history
 auto-do 0 or 1 target effects
 	maybe have a flag to disable actual effects or save and restore gamestate
 	and in-between, just do the effect as if it had an 'a' modifier and count how many it applied to
 	if 0, return false and have use_ability or place_on_board not carry out the task
 	if 1, just auto-do like the other auto-do's on that one valid target
+show log behind hovered card
+within-turn history
+better messaging system
 
 
 file layout:
 general funcs
 	Init
+	chat
 	SendGameState
 	ApplyGameState
 	start_turn
@@ -252,8 +253,8 @@ var effects_dims = [
 		topleft: {x: 1410, y: 175},    topright: {x: 1410+75, y: 175},
 		botleft: {x: 1410, y: 175+85},   botright: {x: 1410+75, y: 175+85} },
 	{ num_cards: 1,
-		topleft: {x: 1415, y: 175},    topright: {x: 1410+75, y: 175},
-		botleft: {x: 1410, y: 175+75},   botright: {x: 1410+75, y: 175+75} },
+		topleft: {x: 10, y: 67+75*6},    topright: {x: 10+75, y: 67+75*6},
+		botleft: {x: 10, y: 67+75*7},   botright: {x: 10+75, y: 67+75*7} },
 ];
 
 // gameplay constants
@@ -302,7 +303,7 @@ var cards = [
 	{id: 6,  name: "Watchtower",        abilities: [{cost: 1, effect: "?(vr):d(2u)"}],                        initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 2},
 	{id: 7,  name: "Juggernaut",        abilities: [{cost: 1, effect: "unique"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 3},
 	{id: 8,  name: "Railgun",           abilities: [{cost: 2, effect: "d(2u)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 4},
-	{id: 9,  name: "Scud Launcher",     abilities: [{cost: 1, effect: "2d(1)"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 0},
+	{id: 9,  name: "Scud Launcher",     abilities: [{cost: 1, effect: "2d(1)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 0},
 	{id: 10, name: "Mercenary Camp",    abilities: [{cost: 2, effect: "2[jj]k(1)"}],                          initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 1},
 	{id: 11, name: "Garage",            abilities: [{cost: 1, effect: "a"}],                                  initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 2},
 	{id: 12, name: "Mulcher",           abilities: [{cost: 0, effect: "k(1p)t"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 3},
@@ -316,7 +317,7 @@ var cards = [
 	{id: 19, name: "Nest of Spies",     abilities: [{cost: 1, effect: "?(mp):d(2u)"}],                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 0},
 	{id: 20, name: "Omen Clock",        abilities: [{cost: 1, effect: "v(a)"}],                               initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 1},
 	{id: 21, name: "Scavenger Camp",    abilities: [{cost: 2, effect: "a"}, {cost: 1, effect: "?(r):r"}],     initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 2},
-	{id: 22, name: "Training Camp",     abilities: [{cost: 1, effect: "f(1np)?(iv)::j(i)pw"}],                 initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 3},
+	{id: 22, name: "Training Camp",     abilities: [{cost: 1, effect: "f(1np)?(iv)::j(i)pw"}],                initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 3},
 	{id: 23, name: "Oasis",             abilities: [],                                                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 4},
 	{id: 24, name: "Labor Camp",        abilities: [{cost: 0, effect: "k(1p)r"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 0},
 	{id: 25, name: "Atomic Garden",     abilities: [{cost: 2, effect: "r(1dp)m(i)"}],                         initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 1},
@@ -331,7 +332,7 @@ var cards = [
 	// camps3
 	{id: 34, name: "Transplant Lab",    abilities: [{cost: 1, effect: "?(mp):r"}],                            initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 0},
 	{id: 35, name: "Command Post",      abilities: [{cost: 3, effect: "d(2u)"}],                              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 1},
-	{id: 36, name: "Construction Yard", abilities: [{cost: 1, effect: "?(sy)::f(1nm)k(s)m(i)"}],               initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 0},
+	{id: 36, name: "Construction Yard", abilities: [{cost: 1, effect: "?(sy)::f(1nm)m(i)k(s)"}],              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 0},
 	{id: 37, name: "Obelisk",           abilities: [],                                                        initial_draw: 3, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 1},
 	// people1
 	{id: 38, name: "Mimic",             abilities: [{cost: 0, effect: "b(yp)"}],                              play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 0},
@@ -362,7 +363,7 @@ var cards = [
 	{id: 62, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1},
 	{id: 63, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2},
 	// events
-	{id: 64, name: "High Ground",       delay: 1, effect: "h(4a1p*)c(3f)",                                   play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
+	{id: 64, name: "High Ground",       delay: 1, effect: "h(4a1p*)c(3f)",                                    play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
 	{id: 65, name: "Banish",            delay: 1, effect: "k(2p)",                                            play_cost: 1, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 1},
 	{id: 66, name: "Interrogate",       delay: 0, effect: "t(4)t(4)t(4)t(4)j(3)j(3)j(3)h(3)",                 play_cost: 1, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 2},
 	{id: 67, name: "Famine",            delay: 1, effect: "{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}",            play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 3},
@@ -388,6 +389,7 @@ var cards = [
 ];
 
 // gamestate vars
+var socket = null;
 var my_id = 0;
 var turn = -2;
 var camp_pile = null;
@@ -410,9 +412,33 @@ var dragging_pile = null;
 var dragging_from = null;
 var starting_turn = false;
 var status_text = "";
-var is_logging = true;
+var is_logging = false;
 
 function Init() {
+	// connect to server and set up listeners
+	socket = io();
+	if(socket == null) {console.log("could not connect to server"); return;}
+	socket.on('state', function(state) {
+		if(state.startsWith("redirect:")) {
+			url = state.substring("redirect:".length, state.length);
+			window.location.replace(url);
+			return;
+		}
+		var game_state = JSON.parse(state);
+		ApplyGameState(game_state);
+	});
+	socket.on('chat', function(chat_msg) {
+		console.log(chat_msg);
+		status_text = chat_msg;
+	});
+	// add meta tag that prevents pixel density shenanigans on moble
+	var meta = document.createElement("meta");
+	meta.setAttribute('name','viewport');
+	var content = 'initial-scale=';
+	content += 1 / window.devicePixelRatio;
+	content += ',user-scalable=no';
+	meta.setAttribute('content', content);
+	document.getElementsByTagName('head')[0].appendChild(meta);
 	// fill imgs array
 	for(var i = 0; ; i++) {
 		var img = document.getElementById("img" + i);
@@ -473,6 +499,10 @@ function Init() {
 	p2.basics.cards[2] = raiders_i;
 }
 
+function chat(chat_msg) {
+	socket.emit("chat", chat_msg);
+}
+
 function SendGameState(end_of_turn) {
 	packet_sequence_num += 1;
 	var pile_cards = [draw_pile.cards, discard_pile.cards,
@@ -494,7 +524,7 @@ function SendGameState(end_of_turn) {
 		high_ground_played_this_turn: high_ground_played_this_turn,
 		people_placed_this_turn:      people_placed_this_turn,
 	};
-	socket.emit("msg", JSON.stringify(game_state));
+	socket.emit("state", JSON.stringify(game_state));
 	return game_state;
 }
 
@@ -965,7 +995,12 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 				done_with_optionals();
 			}
 		}
-		if(cur_effect == 'c') {} // play card (handled by on_drag_to_board)
+		if(cur_effect == 'c') { // play card (handled by on_drag_to_board)
+			if(cur_effect == 'c' && cur_mods.includes('3') && !cur_mods.includes('i') && temp_pile.cards.length == 0) {
+				i = effect_str.length;
+				break;
+			}
+		}
 
 		// targeting effects (add an effect card to temp to drag to a card to target)
 		if(cur_effect == 'i') temp_pile.cards.splice(0, 0, injur_effect_i);
@@ -1082,7 +1117,10 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 }
 
 function is_continuing_later(cur_effect, cur_mods) {
-	return temp_pile.cards.length > 0 || (cur_effect == 'j' && !cur_mods.includes('i') && !(estack.length > 0 && estack[0].i >= estack[0].str.length)) || cur_effect == 'c' || (estack.length > 0 && estack[0].to_send);
+	return temp_pile.cards.length > 0
+		|| (cur_effect == 'j' && !cur_mods.includes('i') && !(estack.length > 0 && estack[0].i >= estack[0].str.length))
+		|| (cur_effect == 'c' && !(cur_mods.includes('3') && temp_pile.cards.length == 0))
+		|| (estack.length > 0 && estack[0].to_send);
 }
 
 // used to continue an effect after dragging an effect icon to a target
@@ -1374,6 +1412,13 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			if(pile != p1.board) return false;
 			if(pile.cards[i] == empty_i) return false;
 			pile.card_states[i] = UNHARMED;
+			if(pile.cards[i] >= people_start_i && pile.cards[i] < events_start_i) {
+				people_placed_this_turn += 1;
+				var card = cards[pile.cards[i]];
+				if(card.abilities[2] != null) {
+					resolve(card.abilities[2].effect, pile, i);
+				}
+			}
 		}
 		if(card.id == ready_effect_i) {
 			if(pile != p1.board) return false;
@@ -1441,14 +1486,15 @@ function on_drag_to_discard(pile, i) {
 	var card = cards[dragging_pile.cards[0]];
 	if(is_resolving() && (cur_effect == 'j' || cur_effect == 'r' || cur_effect == 'p')) {
 		if(cur_mods.includes('3') && dragging_from != temp_pile) return false;
-		if(!cur_mods.includes('3') && dragging_from != p1.hand) return false;
+		if(cur_effect == 'j' && !cur_mods.includes('3') && dragging_from != p1.hand) return false;
 		if(card.name == "Water Silo") {
 			move_card(dragging_pile, 0, dragging_from, 0);
 			dragging_pile.cards = [];
 			dragging_from = null;
 			return false;
 		}
-		move_card(dragging_pile, 0, discard_pile, 0);
+		if(card.id < effects_start_i)
+			move_card(dragging_pile, 0, discard_pile, 0);
 		if(estack[0].str == "j(3)c(3fi)") { // special case for playing on full column
 			move_card(temp_pile, 0, estack[0].prev_target_pile, estack[0].prev_target_i);
 			estack[0].i = estack[0].str.length;
@@ -1558,7 +1604,9 @@ function hover_pile(pile, pileX, pileY, reverse_order) {
 		                    mouse.y > card_y && mouse.y < card_y + pile.card_height;
 		if(mouse_on_card) {
 			var card = cards[pile.cards[j]];
-			if(card == null || (pile.card_states[j] & FLIPPED)) continue;
+			if(card == null) continue;
+			var is_camp = card.id >= camps_start_i && card.id < people_start_i;
+			if((pile.card_states[j] & FLIPPED) && !is_camp) continue;
 			var s = hovered_card_scale;
 			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
 				canvas.width - card_width*s, 0, card_width*s, card_height*s, pile.cards[j] < punk_i ? 10 : 1);
@@ -1581,11 +1629,17 @@ function render_pile(pile, pileX, pileY, reverse_order) {
 		var deg = 0;
 		if(pile.card_states[j] & HARMED)
 			deg = 90;
-		if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1)
-			deg += 45;
+		//if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1)
+			//deg += 45;
 		render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
 			pileX + xdiff + pile.scrollX, pileY + ydiff, pile.card_width, pile.card_height,
 			pile.cards[j] < punk_i ? 10 : 1, deg);
+		if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1) {
+			card = cards[85];
+			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
+				pileX + xdiff + pile.scrollX + pile.card_width/8, pileY + ydiff + pile.card_height / 4, pile.card_width*3/4, pile.card_height/2,
+				pile.cards[j] < punk_i ? 10 : 1, deg);
+		}
 	}
 }
 
@@ -1905,6 +1959,7 @@ function main() {
 		if(e.touches.length > 1) button_i = 2;
 		mouse.buttonsDown[button_i] = true;
 		mouse.buttonsPressed[button_i] = true;
+		e.preventDefault();
 	});
 	addEventListener("touchend", function(e) {
 		if(e.touches.length == 0) {
