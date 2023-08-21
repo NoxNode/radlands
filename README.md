@@ -11,13 +11,13 @@
 ## notes
 - custom lobbies: the last digit of the above url is the player id (0 for first, 1 for second - can spectate by using 2-9)
 - custom lobbies: the stuff between the '?' and the last digit is the lobby id (and random seed)
-- match-making: go to the /?match url and it'll put you in a custom lobby with the next person to also go to /?match
+- match-making: go to the /?match url and it'll put you in a custom lobby with the next person to also go to that url
 - choosing camps is treated as a turn (turn -2 and -1)
 - juggernaut isn't implemented yet (would take a lot of refactoring)
 - if there's a problem, try "Restart Turn", refresh the page, or go to a different lobby id
 - the online game doesn't end when the draw pile depletes twice - you can just declare a tie then if you want to follow the rulebook
 - all the cards in the discard pile are visible - if you want to follow the rulebook you can scroll it over so that only the top (left-most) card shows
-- because the url determines the starting player, camps are chosen after knowing who goes first (this is not following the rulebook, but its easier to implement and I kinda like it this way)
+- because the url determines the starting player, camps are chosen after knowing who goes first (I don't think this is following the rulebook, but its easier to implement and I kinda like it this way)
 
 ## controls
 - drag cards to move them
