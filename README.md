@@ -91,10 +91,9 @@
 - look in the table for the thing saying "node server.js" (copy the number on the 2nd-to-left-most column of that row)
 - run the following commands:
 - kill [that number you copied]
-- rm -rf radlands
-- git clone "https://github.com/NoxNode/radlands.git"
 - cd radlands
-- npm install
+- git fetch
+- git rebase
 - node server.js &
 - exit
 - You now have updated your radlands server
