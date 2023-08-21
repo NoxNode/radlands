@@ -1338,7 +1338,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		return false;
 	}
 	var card = cards[dragging_pile.cards[0]];
-	if(card == null) return;
+	if(card == null) return false;
 	var play_cost = card.play_cost;
 	if(cards[pile.cards[6 + (i % 3)]].name == "Oasis") {
 		var other_spot = Math.floor(i / 3) == 0 ? i + 3 : i - 3;
