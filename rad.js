@@ -389,30 +389,30 @@ var cards = [
 ];
 
 // gamestate vars
-var socket = null;
-var my_id = 0;
-var turn = -2;
-var camp_pile = null;
-var draw_pile = null;
-var discard_pile = null;
-var p1 = {water: 0}; // player 1
-var p2 = {water: 0}; // player 2
-var estack = []; // effect stack
+var socket              = null;
+var my_id               = 0;
+var turn                = -2;
+var camp_pile           = null;
+var draw_pile           = null;
+var discard_pile        = null;
+var p1                  = {water: 0}; // player 1
+var p2                  = {water: 0}; // player 2
+var estack              = []; // effect stack
 var packet_sequence_num = 0;
 
 // this_turn trackers
-var raiders_resolved_this_turn = false;
-var event_resolved_this_turn = false;
-var ability_used_this_turn = false;
-var high_ground_played_this_turn = false;
-var people_placed_this_turn = 0;
+var raiders_resolved_this_turn     = false;
+var event_resolved_this_turn       = false;
+var ability_used_this_turn         = false;
+var high_ground_resolved_this_turn = false;
+var people_placed_this_turn        = 0;
 
 // ui vars
 var dragging_pile = null;
 var dragging_from = null;
 var starting_turn = false;
-var status_text = "";
-var is_logging = false;
+var status_text   = "";
+var is_logging    = false;
 
 function Init() {
 	// connect to server and set up listeners
@@ -510,19 +510,19 @@ function SendGameState(end_of_turn) {
 		p2.basics.cards, p2.board.cards, p2.events.cards, p2.hand.cards];
 	var pile_card_states = [p1.board.card_states, p2.board.card_states];
 	var game_state = {
-		packet_sequence_num:          packet_sequence_num,
-		my_id:                        my_id,
-		water:                        p1.water,
-		turn:                         turn,
-		pile_cards:                   pile_cards,
-		pile_card_states:             pile_card_states,
-		end_of_turn:                  end_of_turn,
-		estack:                       estack,
-		raiders_resolved_this_turn:   raiders_resolved_this_turn,
-		event_resolved_this_turn:     event_resolved_this_turn,
-		ability_used_this_turn:       ability_used_this_turn,
-		high_ground_played_this_turn: high_ground_played_this_turn,
-		people_placed_this_turn:      people_placed_this_turn,
+		packet_sequence_num:            packet_sequence_num,
+		my_id:                          my_id,
+		water:                          p1.water,
+		turn:                           turn,
+		pile_cards:                     pile_cards,
+		pile_card_states:               pile_card_states,
+		end_of_turn:                    end_of_turn,
+		estack:                         estack,
+		raiders_resolved_this_turn:     raiders_resolved_this_turn,
+		event_resolved_this_turn:       event_resolved_this_turn,
+		ability_used_this_turn:         ability_used_this_turn,
+		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
+		people_placed_this_turn:        people_placed_this_turn,
 	};
 	socket.emit("state", JSON.stringify(game_state));
 	return game_state;
@@ -539,11 +539,11 @@ function ApplyGameState(game_state) {
 	else
 		p2.water = game_state.water;
 	turn = game_state.turn;
-	raiders_resolved_this_turn   = game_state.raiders_resolved_this_turn;
-	event_resolved_this_turn     = game_state.event_resolved_this_turn;
-	ability_used_this_turn       = game_state.ability_used_this_turn;
-	high_ground_played_this_turn = game_state.high_ground_played_this_turn;
-	people_placed_this_turn      = game_state.people_placed_this_turn;
+	raiders_resolved_this_turn     = game_state.raiders_resolved_this_turn;
+	event_resolved_this_turn       = game_state.event_resolved_this_turn;
+	ability_used_this_turn         = game_state.ability_used_this_turn;
+	high_ground_resolved_this_turn = game_state.high_ground_resolved_this_turn;
+	people_placed_this_turn        = game_state.people_placed_this_turn;
 	// update cards
 	var me = p1;
 	var them = p2;
@@ -615,7 +615,7 @@ function start_turn() {
 	raiders_resolved_this_turn = false;
 	event_resolved_this_turn = false;
 	ability_used_this_turn = false;
-	high_ground_played_this_turn = false;
+	high_ground_resolved_this_turn = false;
 	people_placed_this_turn = 0;
 	// ready unharmed people or punks and not yet destroyed camps
 	for(var i = 0; i < p1.board.card_states.length; i++) {
@@ -787,7 +787,7 @@ function Update() {
 			click_pile(p.basics, basic_xoff, people_yoff, on_click_basic);
 
 		if(turn <= -1 && i == 1) continue; // dont show enemy board before turn 0
-			render_pile(p.board, people_xoff, people_yoff, reverse_order);
+		render_pile(p.board, people_xoff, people_yoff, reverse_order);
 		hover_pile(p.board, people_xoff, people_yoff, reverse_order);
 		if(is_resolving() || turn <= -1 || my_turn)
 			drag_to_pile(p.board, people_xoff, people_yoff, on_drag_to_board, null, null, reverse_order);
@@ -870,7 +870,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		}
 	}
 	if(self_pile != null && self_pile.cards[self_i] != empty_i && cards[self_pile.cards[self_i]].name == "High Ground")
-		high_ground_played_this_turn = true;
+		high_ground_resolved_this_turn = true;
 	var skip_next = false;
 	var cur_effect = estack[0].cur_effect;
 	var cur_mods = "";
@@ -1281,7 +1281,7 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 }
 
 function is_protected(pile, i) {
-	if(high_ground_played_this_turn && pile == p2.board)
+	if(high_ground_resolved_this_turn && pile == p2.board)
 		return false;
 	// is there a card in this column more far up than us
 	var col = i % 3;
