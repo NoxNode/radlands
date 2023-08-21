@@ -36,3 +36,66 @@
 - when argo's trait is active, click the top half of the card for argo's ability
 - if you want to send a message to others in the lobby, you can press ctrl+shift+i then go to the "Console" tab then type chat("your message") and hit enter
 
+## how to host your own free google cloud server
+- go to <https://console.cloud.google.com/>
+- create an account or sign in
+- in the search bar, search "Compute Engine"
+- it'll say you need to create a project, so click "Select a project"
+- click "New Project"
+- give it a name and click "Create"
+- click "Enable" to enable the Compute Engine API
+- click "Enable Billing" (it just needs your info but won't actually cost anything)
+- click "Create Billing Account"
+- follow the instructions to finish creating that
+- when you're back on "Compute Engine" and you've enabled it, click the "Create Instance" button
+- give it a name
+- set region to one of the regions listed here: <https://cloud.google.com/free/docs/free-cloud-features?hl=en#compute>
+- zone can be anything
+- choose "E2"
+- choose "e2-micro"
+- under "Boot disk" click "Change"
+- change "Boot disk type" to "Standard persistent disk"
+- size can be up to 30GB according to the Free Tier limits, but I kept it at 10GB cuz I do not need more
+- click "Select"
+- check "Allow HTTP traffic" and "Allow HTTPS traffic"
+- leave all the other stuff default
+- click "Create"
+- click "Set up firewall rules"
+- click "Create firewall rule"
+- give it a name
+- set Logs off
+- choose "Egress"
+- for "Targets" choose "All instance in network"
+- enter "0.0.0.0/0" in "Source IPv4 ranges"
+- check "TCP"
+- enter "8080" in "Ports" under "TCP"
+- click "Create"
+- may have to make another firewall rule with all the same stuff except "Ingress" instead of "Egress"
+- go back to "VM Instances" (can search "Compute Engine" again)
+- click "SSH" (may have to disable adblock and may have to click "Authorize")
+- run the following commands:
+- sudo apt install git nodejs npm
+- git clone "https://github.com/NoxNode/radlands.git"
+- cd radlands
+- npm install
+- node server.js &
+- exit
+- You now have a free google cloud server running radlands
+- copy the "External IP" for the VM you just created
+- use that IP instead of the one on this page to use your server
+
+## how to update your server when there's updates to this repository
+- navigate to the same "Compute Engine" page you used above
+- click "SSH"
+- run the following command: ps aux
+- look in the table for the thing saying "node server.js" (copy the number on the 2nd-to-left-most column of that row)
+- run the following commands:
+- kill [that number you copied]
+- rm -rf radlands
+- git clone "https://github.com/NoxNode/radlands.git"
+- cd radlands
+- npm install
+- node server.js &
+- exit
+- You now have updated your radlands server
+
