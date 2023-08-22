@@ -87,13 +87,20 @@
 ## how to update your server when there's updates to this repository
 - navigate to the same "Compute Engine" page you used above
 - click "SSH"
+- cd radlands
+- git fetch
+- git rebase
+- exit
+- You now have updated your radlands server
+
+## if the git fetch showed that server.js is updated, do this instead (existing games will be reset):
 - run the following command: ps aux
 - look in the table for the thing saying "node server.js" (copy the number on the 2nd-to-left-most column of that row)
 - run the following commands:
 - kill [that number you copied]
-- cd radlands
-- git fetch
-- git rebase
+- cd radlands (if you haven't already)
+- git fetch (if you haven't already)
+- git rebase (if you haven't already)
 - node server.js &
 - exit
 - You now have updated your radlands server
