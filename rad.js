@@ -1427,7 +1427,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		}
 		if(card.id == punk_effect_i) {
 			if(pile != p1.board) return false;
-			if(pile.cards[i] != empty_i) return false;
+			if(i >= 6) return false;
 			place_on_board(draw_pile, 0, pile, i);
 			p1.board.card_states[i] = FLIPPED;
 			people_placed_this_turn += 1;
