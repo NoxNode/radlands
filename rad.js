@@ -1,7 +1,30 @@
 /*
-TODOs
-
+------ bugs -----
+parachute base vanguard
+	killed vanguard and gave him 2 damage
+parachute base cult leader to kill damaged vanguard
+	killed both and gave no damage
+mimic on mulgur with parachute base
+	killed mimic
+	only took 1 water
+if high ground played, can only move second person to a dedicated spot (probably something with 'i' and prev_target)
 fix problem of non-turn player not being able to restore the same state until turn player does something
+
+
+----- features -----
+optimize assets
+	draw cards in order of id into one big row jpg
+	draw effects in order of id into one big row png
+		https://stackoverflow.com/questions/11112321/how-to-save-canvas-as-png-image
+	take mats from radlands website url
+"Your turn" status_text at start of turn
+sound effects
+	moving a card
+	effects (maybe when spawning something in the temp_pile that doesn't get auto-used)
+	match found sound
+	start game after chose camps
+	end game sound (and message)
+	specific sounds for specific cards
 auto-do 0 or 1 target effects
 	maybe have a flag to disable actual effects or save and restore gamestate
 	and in-between, just do the effect as if it had an 'a' modifier and count how many it applied to
@@ -10,9 +33,10 @@ auto-do 0 or 1 target effects
 show log behind hovered card
 within-turn history
 better messaging system
+make server just use the regular port 80
+	shortens url and steps to create google cloud server
 
-
-file layout:
+----- file layout -----
 general funcs
 	Init
 	chat
@@ -44,8 +68,7 @@ specific event listeners
 common card game stuff
 common js/canvas stuff
 
-
-effect lang
+---- effect lang -----
 	2 = send all following effects to opponent
 	* = first instance means any number of times
 		subsequent * means that first number
@@ -117,10 +140,8 @@ var camps3_i     = 4; // 657x900
 var events_i     = 5; // 1920x1080
 var people1_i    = 6; // 1200x860
 var people2_i    = 7; // 869x900
-var waters_i     = 8; // 360x360
-var components_i = 9; // 1200x800
-var punks_i      = 10;// 167x228
-var effects_i    = 11;// 1034x40
+var components_i = 8; // 1200x800
+var effects_i    = 9; // 1034x40
 
 // spacing constants
 var people_xoff = 225;
@@ -147,114 +168,112 @@ var done_width = card_width * 2;
 
 var camps1_dims = [
 	{ num_cards: 5,
-		topleft: {x: 190, y:  80}, topright: {x: 1085, y: 104},
-		botleft: {x: 180, y: 335}, botright: {x: 1095, y: 345} },
+		topleft: {x: 150, y:   25}, topright: {x: 1902, y:   32},
+		botleft: {x: 150, y:  520}, botright: {x: 1905, y: 525} },
 	{ num_cards: 5,
-		topleft: {x: 177, y: 335}, topright: {x: 1092, y: 345},
-		botleft: {x: 170, y: 605}, botright: {x: 1105, y: 605} },
+		topleft: {x: 150, y:  520}, topright: {x: 1900, y: 525},
+		botleft: {x: 150, y: 1016}, botright: {x: 1900, y: 1022} },
 	{ num_cards: 5,
-		topleft: {x: 170, y: 605}, topright: {x: 1102, y: 605},
-		botleft: {x: 160, y: 880}, botright: {x: 1105, y: 880} },
+		topleft: {x: 150, y: 1016}, topright: {x: 1890, y: 1022},
+		botleft: {x: 155, y: 1502}, botright: {x: 1885, y: 1510} },
 ];
 var camps2_dims = [
 	{ num_cards: 5,
-		topleft: {x: 170, y:  80}, topright: {x: 1045, y: 107},
-		botleft: {x: 153, y: 325}, botright: {x: 1060, y: 345} },
+		topleft: {x: 132, y:   20}, topright: {x: 1857, y:  17},
+		botleft: {x: 130, y:  507}, botright: {x: 1867, y: 502} },
 	{ num_cards: 5,
-		topleft: {x: 153, y: 325}, topright: {x: 1060, y: 345},
-		botleft: {x: 145, y: 590}, botright: {x: 1070, y: 600} },
+		topleft: {x: 127, y:  507}, topright: {x: 1867, y: 502},
+		botleft: {x: 125, y: 1000}, botright: {x: 1870, y: 1000} },
 	{ num_cards: 5,
-		topleft: {x: 145, y: 590}, topright: {x: 1070, y: 600},
-		botleft: {x: 130, y: 870}, botright: {x: 1085, y: 860} },
+		topleft: {x: 125, y: 1000}, topright: {x: 1865, y: 1000},
+		botleft: {x: 125, y: 1495}, botright: {x: 1865, y: 1487} },
 ];
 var camps3_dims = [
 	{ num_cards: 2,
-		topleft: {x: 45, y:  10},  topright: {x: 625, y:  20},
-		botleft: {x: 25, y: 410},  botright: {x: 635, y: 425} },
+		topleft: {x: 13, y:   23},  topright: {x: 690, y:  23},
+		botleft: {x:  8, y:  503},  botright: {x: 700, y: 500} },
 	{ num_cards: 2,
-		topleft: {x: 25, y: 420},  topright: {x: 635, y: 425},
-		botleft: {x: 10, y: 880},  botright: {x: 650, y: 875} },
+		topleft: {x: 12, y:  503},  topright: {x: 700, y: 500},
+		botleft: {x: 13, y:  996},  botright: {x: 705, y: 990} },
 ];
 var events_dims = [
 	{ num_cards: 5,
-		topleft: {x: 30, y: 125},  topright: {x: 1170, y: 135},
-		botleft: {x: 20, y: 450},  botright: {x: 1180, y: 455} },
+		topleft: {x: 35, y:  300},  topright: {x: 1965, y: 305},
+		botleft: {x: 30, y:  850},  botright: {x: 1970, y: 845} },
 	{ num_cards: 5,
-		topleft: {x: 20, y: 450},  topright: {x: 1180, y: 455},
-		botleft: {x: 10, y: 785},  botright: {x: 1190, y: 780} },
+		topleft: {x: 25, y:  850},  topright: {x: 1967, y: 845},
+		botleft: {x: 20, y: 1407},  botright: {x: 1970, y: 1387} },
 ];
 var people1_dims = [
 	{ num_cards: 5,
-		topleft: {x: 165, y:  23}, topright: {x: 1080, y: 50 },
-		botleft: {x: 150, y: 285}, botright: {x: 1090, y: 305} },
+		topleft: {x: 125, y:   37}, topright: {x: 1845, y: 50 },
+		botleft: {x: 125, y:  530}, botright: {x: 1845, y: 540} },
 	{ num_cards: 5,
-		topleft: {x: 150, y: 285}, topright: {x: 1090, y: 305},
-		botleft: {x: 145, y: 555}, botright: {x: 1097, y: 570} },
+		topleft: {x: 130, y:  530}, topright: {x: 1840, y: 540},
+		botleft: {x: 140, y: 1010}, botright: {x: 1830, y: 1017} },
 	{ num_cards: 5,
-		topleft: {x: 145, y: 555}, topright: {x: 1095, y: 570},
-		botleft: {x: 133, y: 825}, botright: {x: 1095, y: 837} },
+		topleft: {x: 140, y: 1010}, topright: {x: 1825, y: 1017},
+		botleft: {x: 142, y: 1477}, botright: {x: 1815, y: 1477} },
 ];
 var people2_dims = [
 	{ num_cards: 4,
-		topleft: {x: 50, y:  25},  topright: {x: 795, y: 48},
-		botleft: {x: 45, y: 288},  botright: {x: 810, y: 300} },
+		topleft: {x: 360, y:  25},  topright: {x: 1700, y: 27},
+		botleft: {x: 360, y: 492},  botright: {x: 1710, y: 500} },
 	{ num_cards: 4,
-		topleft: {x: 45, y: 288},  topright: {x: 810, y: 300},
-		botleft: {x: 35, y: 565},  botright: {x: 818, y: 570} },
+		topleft: {x: 360, y: 495},  topright: {x: 1710, y: 510},
+		botleft: {x: 357, y: 972},  botright: {x: 1714, y: 977} },
 	{ num_cards: 3,
-		topleft: {x: 35, y: 565},  topright: {x: 625, y: 572},
-		botleft: {x: 20, y: 855},  botright: {x: 632, y: 857} },
+		topleft: {x: 360, y: 975},  topright: {x: 1375, y: 980},
+		botleft: {x: 360, y: 1452}, botright: {x: 1377, y: 1460} },
 ];
 var components_dims = [
-	{ num_cards: 5,
-		topleft: {x: 155, y: 190}, topright: {x: 1035, y: 195},
-		botleft: {x: 155, y: 420}, botright: {x: 1035, y: 420} },
-	{ num_cards: 5,
-		topleft: {x: 162, y: 438}, topright: {x: 1035, y: 433},
-		botleft: {x: 162, y: 660}, botright: {x: 1035, y: 650} },
-];
-var punks_dims = [
-	{ num_cards: 1,
-		topleft: {x: 0, y: 0},     topright: {x: 167, y: 0},
-		botleft: {x: 0, y: 228},   botright: {x: 167, y: 228} },
+	{ num_cards: 2,
+		topleft: {x: 267, y:   25}, topright: {x: 1295, y: 22},
+		botleft: {x: 257, y:  745}, botright: {x: 1300, y: 750} },
+	{ num_cards: 3,
+		topleft: {x: 255, y:  757}, topright: {x: 1820, y: 755},
+		botleft: {x: 255, y: 1495}, botright: {x: 1822, y: 1490} },
 ];
 var effects_dims = [
-	{ num_cards: 1,
+	{ num_cards: 1, // 0 aka Destroy
 		topleft: {x: 5, y: 67},    topright: {x: 5+75, y: 67},
 		botleft: {x: 5, y: 67+75},   botright: {x: 5+75, y: 67+75} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 1 ka To Hand
 		topleft: {x: 5, y: 67+75},    topright: {x: 5+75, y: 67+75},
 		botleft: {x: 5, y: 67+75+75},   botright: {x: 5+75, y: 67+75+75} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 2 aka Flip
 		topleft: {x: 5, y: 67+75*2},    topright: {x: 5+75, y: 67+75*2},
 		botleft: {x: 5, y: 67+75*3},   botright: {x: 5+75, y: 67+75*3} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 3 aka Advance
 		topleft: {x: 5, y: 67+75*3},    topright: {x: 5+75, y: 67+75*3},
 		botleft: {x: 5, y: 67+75*4},   botright: {x: 5+75, y: 67+75*4} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 4 aka Play
 		topleft: {x: 5, y: 67+75*4},    topright: {x: 5+75, y: 67+75*4},
 		botleft: {x: 5, y: 67+75*5},   botright: {x: 5+75, y: 67+75*5} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 5 aka Use Ability
 		topleft: {x: 5, y: 67+75*5},    topright: {x: 5+75, y: 67+75*5},
 		botleft: {x: 5, y: 67+75*6},   botright: {x: 5+75, y: 67+75*6} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 6 aka Damage
 		topleft: {x: 473, y: 4},    topright: {x: 473+75, y: 4},
 		botleft: {x: 473, y: 4+75},   botright: {x: 473+75, y: 4+75} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 7 aka Injur
 		topleft: {x: 935, y: 0},    topright: {x: 935+75, y: 0},
 		botleft: {x: 935, y: 0+75},   botright: {x: 935+75, y: 0+75} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 8 aka Restore
 		topleft: {x: 935, y: 218},    topright: {x: 935+75, y: 218},
 		botleft: {x: 935, y: 218+75},   botright: {x: 935+75, y: 218+75} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 9 aka Draw
 		topleft: {x: 1410, y: 0},    topright: {x: 1410+75, y: 0},
 		botleft: {x: 1410, y: 0+85},   botright: {x: 1410+75, y: 0+85} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 10 aka Punk
 		topleft: {x: 1410, y: 175},    topright: {x: 1410+75, y: 175},
 		botleft: {x: 1410, y: 175+85},   botright: {x: 1410+75, y: 175+85} },
-	{ num_cards: 1,
+	{ num_cards: 1, // 11 aka Make Ready (symbol is not ready because we use that but never show "make ready")
 		topleft: {x: 10, y: 67+75*6},    topright: {x: 10+75, y: 67+75*6},
 		botleft: {x: 10, y: 67+75*7},   botright: {x: 10+75, y: 67+75*7} },
+	{ num_cards: 1, // 12 aka water
+		topleft: {x: 1421, y: 465},      topright: {x: 1421+65, y: 465},
+		botleft: {x: 1421, y: 465+75},   botright: {x: 1421+65, y: 465+75} },
 ];
 
 // gameplay constants
@@ -270,22 +289,24 @@ var water_i          = 0;
 var raiders_i        = 1;
 var aid_i            = 2;
 var punk_i           = 3;
-var destroy_effect_i = 74;
-var to_hand_effect_i = 75;
-var flip_effect_i    = 76;
-var advance_effect_i = 77;
-var play_effect_i    = 78;
-var ability_effect_i = 79;
-var damage_effect_i  = 80;
-var injur_effect_i   = 81;
-var restore_effect_i = 82;
-var draw_effect_i    = 83;
-var punk_effect_i    = 84;
-var ready_effect_i   = 85;
-var camps_start_i    = 4;
-var people_start_i   = 38;
-var events_start_i   = 64;
-var effects_start_i  = 74;
+var destroyed_camp_i = 4;
+var destroy_effect_i = 75;
+var to_hand_effect_i = 76;
+var flip_effect_i    = 77;
+var advance_effect_i = 78;
+var play_effect_i    = 79;
+var ability_effect_i = 80;
+var damage_effect_i  = 81;
+var injur_effect_i   = 82;
+var restore_effect_i = 83;
+var draw_effect_i    = 84;
+var punk_effect_i    = 85;
+var ready_effect_i   = 86;
+var water_effect_i   = 87;
+var camps_start_i    = 5;
+var people_start_i   = 39;
+var events_start_i   = 65;
+var effects_start_i  = 75;
 var UNHARMED = 0;
 var HARMED   = 1;
 var FLIPPED  = 2; // punk if person, destroyed if camp
@@ -296,96 +317,98 @@ var cards = [
 	{id: 0,  name: "Water Silo", junk: JUNK_WATER,        img_i: components_i, dims: components_dims, row_i: 1, col_i: 1},
 	{id: 1,  name: "Raiders", delay: 2, effect: "2d(1m)", img_i: components_i, dims: components_dims, row_i: 1, col_i: 2},
 	{id: 2,  name: "Effect Aid",                          img_i: components_i, dims: components_dims, row_i: 1, col_i: 0},
-	{id: 3,  name: "Punk",                                img_i: punks_i,      dims: punks_dims,      row_i: 0, col_i: 0},
+	{id: 3,  name: "Punk",                                img_i: components_i, dims: components_dims, row_i: 0, col_i: 0},
+	{id: 4,  name: "Destroyed Camp",                      img_i: components_i, dims: components_dims, row_i: 0, col_i: 1},
 	// camps1
-	{id: 4,  name: "Catapult",          abilities: [{cost: 2, effect: "k(1p)d(2)"}],                          initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 0},
-	{id: 5,  name: "The Octagon",       abilities: [{cost: 1, effect: "k(1p)2k(1p)"}],                        initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 1},
-	{id: 6,  name: "Watchtower",        abilities: [{cost: 1, effect: "?(vr):d(2u)"}],                        initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 2},
-	{id: 7,  name: "Juggernaut",        abilities: [{cost: 1, effect: "unique"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 3},
-	{id: 8,  name: "Railgun",           abilities: [{cost: 2, effect: "d(2u)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 4},
-	{id: 9,  name: "Scud Launcher",     abilities: [{cost: 1, effect: "2d(1)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 0},
-	{id: 10, name: "Mercenary Camp",    abilities: [{cost: 2, effect: "2[jj]k(1)"}],                          initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 1},
-	{id: 11, name: "Garage",            abilities: [{cost: 1, effect: "a"}],                                  initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 2},
-	{id: 12, name: "Mulcher",           abilities: [{cost: 0, effect: "k(1p)t"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 3},
-	{id: 13, name: "Victory Totem",     abilities: [{cost: 2, effect: "i(2up)"}, {cost: 2, effect: "a"}],     initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 4},
-	{id: 14, name: "Cache",             abilities: [{cost: 0, effect: "d(s)[p][r]t"}],                        initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 0},
-	{id: 15, name: "Blood Bank",        abilities: [{cost: 0, effect: "k(1p)w"}],                             initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 1},
-	{id: 16, name: "Reactor",           abilities: [{cost: 2, effect: "k(s)k(ap)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 2},
-	{id: 17, name: "Cannon",            abilities: [{cost: 1, effect: "d(s)d(2u)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 3},
-	{id: 18, name: "Adrenaline Lab",    abilities: [{cost: 0, effect: "b(1dp)k(i)"}],                         initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 4},
+	{id: 5,  name: "Catapult",          abilities: [{cost: 2, effect: "k(1p)d(2)"}],                          initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 0},
+	{id: 6,  name: "The Octagon",       abilities: [{cost: 1, effect: "k(1p)2k(1p)"}],                        initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 1},
+	{id: 7,  name: "Watchtower",        abilities: [{cost: 1, effect: "?(vr):d(2u)"}],                        initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 2},
+	{id: 8,  name: "Juggernaut",        abilities: [{cost: 1, effect: "unique"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 3},
+	{id: 9,  name: "Railgun",           abilities: [{cost: 2, effect: "d(2u)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 0, col_i: 4},
+	{id: 10, name: "Scud Launcher",     abilities: [{cost: 1, effect: "2d(1)"}],                              initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 0},
+	{id: 11, name: "Mercenary Camp",    abilities: [{cost: 2, effect: "2[jj]k(1)"}],                          initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 1},
+	{id: 12, name: "Garage",            abilities: [{cost: 1, effect: "a"}],                                  initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 2},
+	{id: 13, name: "Mulcher",           abilities: [{cost: 0, effect: "k(1p)t"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 3},
+	{id: 14, name: "Victory Totem",     abilities: [{cost: 2, effect: "i(2up)"}, {cost: 2, effect: "a"}],     initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 4},
+	{id: 15, name: "Cache",             abilities: [{cost: 0, effect: "d(s)[p][r]t"}],                        initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 0},
+	{id: 16, name: "Blood Bank",        abilities: [{cost: 0, effect: "k(1p)w"}],                             initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 1},
+	{id: 17, name: "Reactor",           abilities: [{cost: 2, effect: "k(s)k(ap)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 2},
+	{id: 18, name: "Cannon",            abilities: [{cost: 1, effect: "d(s)d(2u)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 3},
+	{id: 19, name: "Adrenaline Lab",    abilities: [{cost: 0, effect: "b(1dp)k(i)"}],                         initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 4},
 	// camps2
-	{id: 19, name: "Nest of Spies",     abilities: [{cost: 1, effect: "?(mp):d(2u)"}],                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 0},
-	{id: 20, name: "Omen Clock",        abilities: [{cost: 1, effect: "v(a)"}],                               initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 1},
-	{id: 21, name: "Scavenger Camp",    abilities: [{cost: 2, effect: "a"}, {cost: 1, effect: "?(r):r"}],     initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 2},
-	{id: 22, name: "Training Camp",     abilities: [{cost: 1, effect: "f(1np)?(iv)::j(i)pw"}],                initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 3},
-	{id: 23, name: "Oasis",             abilities: [],                                                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 4},
-	{id: 24, name: "Labor Camp",        abilities: [{cost: 0, effect: "k(1p)r"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 0},
-	{id: 25, name: "Atomic Garden",     abilities: [{cost: 2, effect: "r(1dp)m(i)"}],                         initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 1},
-	{id: 26, name: "Parachute Base",    abilities: [{cost: 0, effect: "cb(i)d(i)"}],                          initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 2},
-	{id: 27, name: "Arcade",            abilities: [{cost: 1, effect: "?(fp):p"}],                            initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 3},
-	{id: 28, name: "Resonator",         abilities: [{cost: 2, effect: "k(2ud)"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 4},
-	{id: 29, name: "Bonfire",           abilities: [{cost: 0, effect: "d(s)*r"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 0},
-	{id: 30, name: "Pilbox",            abilities: [{cost: 3, effect: "d(2u)"}],                              initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 1},
-	{id: 31, name: "Outpost",           abilities: [{cost: 2, effect: "a"}, {cost: 2, effect: "r"}],          initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 2},
-	{id: 32, name: "Warehouse",         abilities: [{cost: 0, effect: "d(s)j*j*++t"}],                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 3},
-	{id: 32, name: "Supply Depot",      abilities: [{cost: 2, effect: "t(4)t(4)j(3)h(3)"}],                   initial_draw: 2, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 4},
+	{id: 20, name: "Nest of Spies",     abilities: [{cost: 1, effect: "?(mp):d(2u)"}],                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 0},
+	{id: 21, name: "Omen Clock",        abilities: [{cost: 1, effect: "v(a)"}],                               initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 1},
+	{id: 22, name: "Scavenger Camp",    abilities: [{cost: 2, effect: "a"}, {cost: 1, effect: "?(r):r"}],     initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 2},
+	{id: 23, name: "Training Camp",     abilities: [{cost: 1, effect: "f(1np)?(iv)::j(i)pw"}],                initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 3},
+	{id: 24, name: "Oasis",             abilities: [],                                                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 4},
+	{id: 25, name: "Labor Camp",        abilities: [{cost: 0, effect: "k(1p)r"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 0},
+	{id: 26, name: "Atomic Garden",     abilities: [{cost: 2, effect: "r(1dp)m(i)"}],                         initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 1},
+	{id: 27, name: "Parachute Base",    abilities: [{cost: 0, effect: "cb(i)d(i)"}],                          initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 2},
+	{id: 28, name: "Arcade",            abilities: [{cost: 1, effect: "?(fp):p"}],                            initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 3},
+	{id: 29, name: "Resonator",         abilities: [{cost: 2, effect: "k(2ud)"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 1, col_i: 4},
+	{id: 30, name: "Bonfire",           abilities: [{cost: 0, effect: "d(s)*r"}],                             initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 0},
+	{id: 31, name: "Pilbox",            abilities: [{cost: 3, effect: "d(2u)"}],                              initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 1},
+	{id: 32, name: "Outpost",           abilities: [{cost: 2, effect: "a"}, {cost: 2, effect: "r"}],          initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 2},
+	{id: 33, name: "Warehouse",         abilities: [{cost: 0, effect: "d(s)j*j*++t"}],                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 3},
+	{id: 33, name: "Supply Depot",      abilities: [{cost: 2, effect: "t(4)t(4)j(3)h(3)"}],                   initial_draw: 2, img_i: camps2_i,  dims: camps2_dims,  row_i: 2, col_i: 4},
 	// camps3
-	{id: 34, name: "Transplant Lab",    abilities: [{cost: 1, effect: "?(mp):r"}],                            initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 0},
-	{id: 35, name: "Command Post",      abilities: [{cost: 3, effect: "d(2u)"}],                              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 1},
-	{id: 36, name: "Construction Yard", abilities: [{cost: 1, effect: "?(sy)::f(1nm)m(i)k(s)"}],              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 0},
-	{id: 37, name: "Obelisk",           abilities: [],                                                        initial_draw: 3, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 1},
+	{id: 35, name: "Transplant Lab",    abilities: [{cost: 1, effect: "?(mp):r"}],                            initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 0},
+	{id: 36, name: "Command Post",      abilities: [{cost: 3, effect: "d(2u)"}],                              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 1},
+	{id: 37, name: "Construction Yard", abilities: [{cost: 1, effect: "?(sy)::f(1nm)m(i)k(s)"}],              initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 0},
+	{id: 38, name: "Obelisk",           abilities: [],                                                        initial_draw: 3, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 1},
 	// people1
-	{id: 38, name: "Mimic",             abilities: [{cost: 0, effect: "b(yp)"}],                              play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 0},
-	{id: 39, name: "Wounded Soldier",   abilities: [{cost: 1, effect: "d(2u)"},null,{effect:"td(s)"}],        play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 1},
-	{id: 40, name: "Muse",              abilities: [{cost: 0, effect: "w"}],                                  play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 2},
-	{id: 41, name: "Cult Leader",       abilities: [{cost: 0, effect: "k(1p)d(2u)"}],                         play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 3},
-	{id: 42, name: "Pyromaniac",        abilities: [{cost: 1, effect: "d(2um)"}],                             play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 4},
-	{id: 43, name: "Mutant",            abilities: [{cost: 0, effect: "d(2u)rd(s)"}],                         play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 0},
-	{id: 44, name: "Gunner",            abilities: [{cost: 2, effect: "i(a2up)"}],                            play_cost: 1, junk: JUNK_RESTORE, img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 1},
-	{id: 45, name: "Vigilante",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 2},
-	{id: 46, name: "Assassin",          abilities: [{cost: 2, effect: "k(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 3},
-	{id: 47, name: "Rabble Rouser",     abilities: [{cost: 1, effect: "p"}, {cost: 1, effect: "?(p):d(2u)"}], play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 4},
-	{id: 48, name: "Doomsayer",         abilities: [{cost: 1, effect: "?(2v):d(2u)"},null,{effect:"v(2d)"}],  play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 0},
-	{id: 49, name: "Scientist",         abilities: [{cost: 1, effect: "t(4)t(4)t(4)j(3)j(3)b(3j)"}],          play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 1},
-	{id: 50, name: "Vanguard",          abilities: [{cost: 1, effect: "d(2u)2d(2u)"},null,{effect:"p"}],      play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 2},
-	{id: 51, name: "Looter",            abilities: [{cost: 2, effect: "d(2u)?(im):t"}],                       play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 3},
-	{id: 52, name: "Scout",             abilities: [{cost: 1, effect: "a"}],                                  play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 4},
+	{id: 39, name: "Mimic",             abilities: [{cost: 0, effect: "b(yp)"}],                              play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 0},
+	{id: 40, name: "Wounded Soldier",   abilities: [{cost: 1, effect: "d(2u)"},null,{effect:"td(s)"}],        play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 1},
+	{id: 41, name: "Muse",              abilities: [{cost: 0, effect: "w"}],                                  play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 2},
+	{id: 42, name: "Cult Leader",       abilities: [{cost: 0, effect: "k(1p)d(2u)"}],                         play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 3},
+	{id: 43, name: "Pyromaniac",        abilities: [{cost: 1, effect: "d(2um)"}],                             play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 4},
+	{id: 44, name: "Mutant",            abilities: [{cost: 0, effect: "d(2u)rd(s)"}],                         play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 0},
+	{id: 45, name: "Vigilante",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 1},
+	{id: 46, name: "Gunner",            abilities: [{cost: 2, effect: "i(a2up)"}],                            play_cost: 1, junk: JUNK_RESTORE, img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 2},
+	{id: 47, name: "Assassin",          abilities: [{cost: 2, effect: "k(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 3},
+	{id: 48, name: "Rabble Rouser",     abilities: [{cost: 1, effect: "p"}, {cost: 1, effect: "?(p):d(2u)"}], play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 4},
+	{id: 49, name: "Doomsayer",         abilities: [{cost: 1, effect: "?(2v):d(2u)"},null,{effect:"v(2d)"}],  play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 0},
+	{id: 50, name: "Scientist",         abilities: [{cost: 1, effect: "t(4)t(4)t(4)j(3)j(3)b(3j)"}],          play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 1},
+	{id: 51, name: "Vanguard",          abilities: [{cost: 1, effect: "d(2u)2d(2u)"},null,{effect:"p"}],      play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 2},
+	{id: 52, name: "Looter",            abilities: [{cost: 2, effect: "d(2u)?(im):t"}],                       play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 3},
+	{id: 53, name: "Scout",             abilities: [{cost: 1, effect: "a"}],                                  play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 4},
 	// people2
-	{id: 53, name: "Exterminator",      abilities: [{cost: 1, effect: "k(a2dp)"}],                            play_cost: 1, junk: JUNK_DRAW   , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 0},
-	{id: 54, name: "Sniper",            abilities: [{cost: 2, effect: "d(2)"}],                               play_cost: 1, junk: JUNK_RESTORE, img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 1},
-	{id: 55, name: "Rescue Team",       abilities: [{cost: 0, effect: "h(1p)"},null,{effect:"m(s)"}],         play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 2},
-	{id: 56, name: "Repair Bot",        abilities: [{cost: 2, effect: "r"},null,{effect:"r"}],                play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 3},
-	{id: 57, name: "Holdout",           abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 2, junk: JUNK_RAID   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 0},
-	{id: 58, name: "Vera Vosh",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 1},
-	{id: 59, name: "Zeto Khan",         abilities: [{cost: 1, effect: "tttjjj"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 2},
-	{id: 60, name: "Argo Yesky",        abilities: [{cost: 1, effect: "d(2u)"},null,{effect:"p"}],            play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 3},
-	{id: 61, name: "Magnus Karv",       abilities: [{cost: 2, effect: "d(2l)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 0},
-	{id: 62, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1},
-	{id: 63, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2},
+	{id: 54, name: "Exterminator",      abilities: [{cost: 1, effect: "k(a2dp)"}],                            play_cost: 1, junk: JUNK_DRAW   , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 0},
+	{id: 55, name: "Sniper",            abilities: [{cost: 2, effect: "d(2)"}],                               play_cost: 1, junk: JUNK_RESTORE, img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 1},
+	{id: 56, name: "Rescue Team",       abilities: [{cost: 0, effect: "h(1p)"},null,{effect:"m(s)"}],         play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 2},
+	{id: 57, name: "Repair Bot",        abilities: [{cost: 2, effect: "r"},null,{effect:"r"}],                play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 3},
+	{id: 58, name: "Holdout",           abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 2, junk: JUNK_RAID   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 0},
+	{id: 59, name: "Vera Vosh",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 1},
+	{id: 60, name: "Zeto Khan",         abilities: [{cost: 1, effect: "tttjjj"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 2},
+	{id: 61, name: "Argo Yesky",        abilities: [{cost: 1, effect: "d(2u)"},null,{effect:"p"}],            play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 3},
+	{id: 62, name: "Magnus Karv",       abilities: [{cost: 2, effect: "d(2l)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 0},
+	{id: 63, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1},
+	{id: 64, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2},
 	// events
-	{id: 64, name: "High Ground",       delay: 1, effect: "h(4a1p*)c(3f)",                                    play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
-	{id: 65, name: "Banish",            delay: 1, effect: "k(2p)",                                            play_cost: 1, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 1},
-	{id: 66, name: "Interrogate",       delay: 0, effect: "t(4)t(4)t(4)t(4)j(3)j(3)j(3)h(3)",                 play_cost: 1, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 2},
-	{id: 67, name: "Famine",            delay: 1, effect: "{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}",            play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 3},
-	{id: 68, name: "Uprising",          delay: 2, effect: "ppp",                                              play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 4},
-	{id: 69, name: "Strafe",            delay: 0, effect: "i(a2up)",                                          play_cost: 2, junk: JUNK_DRAW   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 0},
-	{id: 70, name: "Truce",             delay: 0, effect: "h(1ap)2h(1ap)",                                    play_cost: 2, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 1},
-	{id: 71, name: "Radiation",         delay: 1, effect: "i(ap)",                                            play_cost: 2, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 2},
-	{id: 72, name: "Napalm",            delay: 1, effect: "k(2lp)",                                           play_cost: 2, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 3},
-	{id: 73, name: "Bombardment",       delay: 3, effect: "d(a2m)?(26mk):t?(27mk):t?(28mk):t",                play_cost: 4, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 4},
+	{id: 65, name: "High Ground",       delay: 1, effect: "h(4a1p*)c(3f)",                                    play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
+	{id: 66, name: "Banish",            delay: 1, effect: "k(2p)",                                            play_cost: 1, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 1},
+	{id: 67, name: "Interrogate",       delay: 0, effect: "t(4)t(4)t(4)t(4)j(3)j(3)j(3)h(3)",                 play_cost: 1, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 2},
+	{id: 68, name: "Famine",            delay: 1, effect: "{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}",            play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 3},
+	{id: 69, name: "Uprising",          delay: 2, effect: "ppp",                                              play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 4},
+	{id: 70, name: "Strafe",            delay: 0, effect: "i(a2up)",                                          play_cost: 2, junk: JUNK_DRAW   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 0},
+	{id: 71, name: "Truce",             delay: 0, effect: "h(1ap)2h(1ap)",                                    play_cost: 2, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 1},
+	{id: 72, name: "Radiation",         delay: 1, effect: "i(ap)",                                            play_cost: 2, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 2},
+	{id: 73, name: "Napalm",            delay: 1, effect: "k(2lp)",                                           play_cost: 2, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 3},
+	{id: 74, name: "Bombardment",       delay: 3, effect: "d(a2m)?(26mk):t?(27mk):t?(28mk):t",                play_cost: 4, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 4},
 	// effects
-	{id: 74, name: "Destroy",           effect: "k",    img_i: effects_i, dims: effects_dims, row_i: 0,  col_i: 0},
-	{id: 75, name: "To Hand",           effect: "h",    img_i: effects_i, dims: effects_dims, row_i: 1,  col_i: 0},
-	{id: 76, name: "Flip",              effect: "f",    img_i: effects_i, dims: effects_dims, row_i: 2,  col_i: 0},
-	{id: 77, name: "Advance",           effect: "v(a)", img_i: effects_i, dims: effects_dims, row_i: 3,  col_i: 0},
-	{id: 78, name: "Play",              effect: "c",    img_i: effects_i, dims: effects_dims, row_i: 4,  col_i: 0},
-	{id: 79, name: "Use Ability",       effect: "b",    img_i: effects_i, dims: effects_dims, row_i: 5,  col_i: 0},
-	{id: 80, name: "Damage",            effect: "d",    img_i: effects_i, dims: effects_dims, row_i: 6,  col_i: 0},
-	{id: 81, name: "Injur",             effect: "i",    img_i: effects_i, dims: effects_dims, row_i: 7,  col_i: 0},
-	{id: 82, name: "Restore",           effect: "r",    img_i: effects_i, dims: effects_dims, row_i: 8,  col_i: 0},
-	{id: 83, name: "Draw",              effect: "t",    img_i: effects_i, dims: effects_dims, row_i: 9,  col_i: 0},
-	{id: 84, name: "Punk",              effect: "p",    img_i: effects_i, dims: effects_dims, row_i: 10, col_i: 0},
-	{id: 85, name: "Make Ready",        effect: "m",    img_i: effects_i, dims: effects_dims, row_i: 11, col_i: 0},
+	{id: 75, name: "Destroy",           effect: "k",    img_i: effects_i, dims: effects_dims, row_i: 0,  col_i: 0},
+	{id: 76, name: "To Hand",           effect: "h",    img_i: effects_i, dims: effects_dims, row_i: 1,  col_i: 0},
+	{id: 77, name: "Flip",              effect: "f",    img_i: effects_i, dims: effects_dims, row_i: 2,  col_i: 0},
+	{id: 78, name: "Advance",           effect: "v(a)", img_i: effects_i, dims: effects_dims, row_i: 3,  col_i: 0},
+	{id: 79, name: "Play",              effect: "c",    img_i: effects_i, dims: effects_dims, row_i: 4,  col_i: 0},
+	{id: 80, name: "Use Ability",       effect: "b",    img_i: effects_i, dims: effects_dims, row_i: 5,  col_i: 0},
+	{id: 81, name: "Damage",            effect: "d",    img_i: effects_i, dims: effects_dims, row_i: 6,  col_i: 0},
+	{id: 82, name: "Injur",             effect: "i",    img_i: effects_i, dims: effects_dims, row_i: 7,  col_i: 0},
+	{id: 83, name: "Restore",           effect: "r",    img_i: effects_i, dims: effects_dims, row_i: 8,  col_i: 0},
+	{id: 84, name: "Draw",              effect: "t",    img_i: effects_i, dims: effects_dims, row_i: 9,  col_i: 0},
+	{id: 85, name: "Punk",              effect: "p",    img_i: effects_i, dims: effects_dims, row_i: 10, col_i: 0},
+	{id: 86, name: "Make Ready",        effect: "m",    img_i: effects_i, dims: effects_dims, row_i: 11, col_i: 0},
+	{id: 86, name: "Water",             effect: "w",    img_i: effects_i, dims: effects_dims, row_i: 12, col_i: 0},
 ];
 
 // gamestate vars
@@ -413,6 +436,9 @@ var dragging_from = null;
 var starting_turn = false;
 var status_text   = "";
 var is_logging    = false;
+var oc = null;
+var octx = null;
+var oc_scale = 3;
 
 function Init() {
 	// connect to server and set up listeners
@@ -431,21 +457,18 @@ function Init() {
 		console.log(chat_msg);
 		status_text = chat_msg;
 	});
-	// add meta tag that prevents pixel density shenanigans on moble
-	var meta = document.createElement("meta");
-	meta.setAttribute('name','viewport');
-	var content = 'initial-scale=';
-	content += 1 / window.devicePixelRatio;
-	content += ',user-scalable=no';
-	meta.setAttribute('content', content);
-	document.getElementsByTagName('head')[0].appendChild(meta);
 	// fill imgs array
 	for(var i = 0; ; i++) {
 		var img = document.getElementById("img" + i);
 		if(img == null) break;
 		imgs.push(img);
 	}
-	// send connection packet to server
+	// init offscreen canvas and context for an intermediate for drawing cards for smooth scaling
+	oc = document.createElement("canvas");
+	octx = oc.getContext("2d");
+	oc.width = card_width * oc_scale;
+	oc.height = card_width * oc_scale;
+	// send connection packet to server and apply random seed
 	var url = window.location.href;
 	applySeed(url.substring(0, url.length-1));
 	my_id = Number(url[url.length-1]);
@@ -504,6 +527,7 @@ function chat(chat_msg) {
 }
 
 function SendGameState(end_of_turn) {
+	if(my_id > 1) return; // don't send anything as a spectator
 	packet_sequence_num += 1;
 	var pile_cards = [draw_pile.cards, discard_pile.cards,
 		p1.basics.cards, p1.board.cards, p1.events.cards, p1.hand.cards,
@@ -523,12 +547,22 @@ function SendGameState(end_of_turn) {
 		ability_used_this_turn:         ability_used_this_turn,
 		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
 		people_placed_this_turn:        people_placed_this_turn,
+		version: 1,
 	};
 	socket.emit("state", JSON.stringify(game_state));
 	return game_state;
 }
 
 function ApplyGameState(game_state) {
+	// adapt old game_states to new
+	if(game_state.version == null) {
+		for(var i = 0; i < game_state.piles.length; i++) {
+			for(var j = 0; j < game_state.piles[i].length; j++) {
+				if(game_state.piles[i][j] < punk_i) continue;
+				game_state.piles[i][j] += 1;
+			}
+		}
+	}
 	status_text = "";
 	if(is_logging) console.log("applying: ");
 	if(is_logging) console.log(game_state);
@@ -617,13 +651,13 @@ function start_turn() {
 	ability_used_this_turn = false;
 	high_ground_resolved_this_turn = false;
 	people_placed_this_turn = 0;
-	// ready unharmed people or punks and not yet destroyed camps
+	// ready camps and unharmed people or punks
 	for(var i = 0; i < p1.board.card_states.length; i++) {
 		if(p1.board.cards[i] == empty_i)
 			p1.board.card_states[i] = UNHARMED;
 		else if(i < 6 && (p1.board.card_states[i] & 3) != HARMED)
 			p1.board.card_states[i] |= READY;
-		else if(i >= 6 && (p1.board.card_states[i] & 3) != FLIPPED)
+		else if(i >= 6)
 			p1.board.card_states[i] |= READY;
 	}
 	// events (defer resolving 1st slot, move 2nd and 3rd up 1)
@@ -723,18 +757,22 @@ function Update() {
 
 	var my_turn = turn >= 0 && turn % num_players == my_id;
 	var temp_width = canvas.width;
-	if(is_resolving() && estack[0].i > 0) {
-		var prev_effect = estack[0].str[estack[0].i - 1];
-		if(prev_effect == '[' || prev_effect == '*') {
-			temp_width -= done_width - 10;
-			DoButton("Done", done_with_optionals, canvas.width - done_width, temp_yoff, done_width, card_height);
+	var draggable_end_i = -1;
+	if(is_resolving()) {
+		if(estack[0].i > 0) {
+			var prev_effect = estack[0].str[estack[0].i - 1];
+			if(prev_effect == '[' || prev_effect == '*') {
+				temp_width -= done_width - 10;
+				DoButton("Done", done_with_optionals, canvas.width - done_width, temp_yoff, done_width, card_height);
+			}
 		}
+		draggable_end_i = estack[0].my_num_in_temp;
 	}
 	DrawRect(mat_endx, temp_yoff, temp_width - mat_endx - 10, card_height, "grey");
 	DrawText("Temp:", mat_endx, temp_yoff - 12, 24, "white");
 	render_pile(temp_pile, mat_endx, temp_yoff);
 	scroll_pile(temp_pile, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
-	drag_from_pile(temp_pile, mat_endx, temp_yoff);
+	drag_from_pile(temp_pile, mat_endx, temp_yoff, draggable_end_i);
 
 	if(my_turn) {
 		DoButton("Restart Turn", restart_turn, mat_endx + 10, 140, card_width * 2 + 10, card_width);
@@ -855,6 +893,8 @@ function push_effect(effect_str, self_pile, self_i) {
 		success: false,
 		received: null,
 		to_send: null,
+		my_num_in_temp: 0,
+		prev_total_in_temp: temp_pile.cards.length,
 	};
 	estack.splice(0, 0, new_effect);
 }
@@ -1003,15 +1043,15 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		}
 
 		// targeting effects (add an effect card to temp to drag to a card to target)
-		if(cur_effect == 'i') temp_pile.cards.splice(0, 0, injur_effect_i);
-		if(cur_effect == 'r') temp_pile.cards.splice(0, 0, restore_effect_i);
-		if(cur_effect == 'p') temp_pile.cards.splice(0, 0, punk_effect_i);
-		if(cur_effect == 'd') temp_pile.cards.splice(0, 0, damage_effect_i);
-		if(cur_effect == 'k') temp_pile.cards.splice(0, 0, destroy_effect_i);
-		if(cur_effect == 'h') temp_pile.cards.splice(0, 0, to_hand_effect_i);
-		if(cur_effect == 'f') temp_pile.cards.splice(0, 0, flip_effect_i);
-		if(cur_effect == 'm') temp_pile.cards.splice(0, 0, ready_effect_i);
-		if(cur_effect == 'b') temp_pile.cards.splice(0, 0, ability_effect_i);
+		if(cur_effect == 'i') move_card(null, injur_effect_i, temp_pile, 0);
+		if(cur_effect == 'r') move_card(null, restore_effect_i, temp_pile, 0);
+		if(cur_effect == 'p') move_card(null, punk_effect_i, temp_pile, 0);
+		if(cur_effect == 'd') move_card(null, damage_effect_i, temp_pile, 0);
+		if(cur_effect == 'k') move_card(null, destroy_effect_i, temp_pile, 0);
+		if(cur_effect == 'h') move_card(null, to_hand_effect_i, temp_pile, 0);
+		if(cur_effect == 'f') move_card(null, flip_effect_i, temp_pile, 0);
+		if(cur_effect == 'm') move_card(null, ready_effect_i, temp_pile, 0);
+		if(cur_effect == 'b') move_card(null, ability_effect_i, temp_pile, 0);
 		// simulate drag from the effect card to the board for a,s,i,3,5 modifiers
 		if(temp_pile.cards.length > 0 && temp_pile.cards[0] >= effects_start_i &&
 		(cur_mods.includes('a') || cur_mods.includes('s') || cur_mods.includes('i') || cur_mods.includes('3') || cur_mods.includes('5'))) {
@@ -1101,11 +1141,15 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		}
 		break;
 	}
+	if(estack.length > 0 && temp_pile.cards.length != estack[0].prev_total_in_temp) {
+		estack[0].my_num_in_temp += temp_pile.cards.length - estack[0].prev_total_in_temp;
+		estack[0].prev_total_in_temp = temp_pile.cards.length;
+	}
 
 	// pop effect if done with it
 	if(!is_continuing_later(cur_effect, cur_mods) && !repeating_effect && i >= effect_str.length) {
 		estack.splice(0, 1);
-		if(estack.length > 0) { // continue down the stack if not empty yet
+		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].cur_mods)) { // continue down the stack if not empty yet
 			continue_effect(self_pile, self_i);
 		}
 		if(estack.length == 0 && !starting_turn) {
@@ -1117,10 +1161,12 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 }
 
 function is_continuing_later(cur_effect, cur_mods) {
+	if(estack.length == 0) return false;
+	if(estack[0].i >= estack[0].str.length) return false;
 	return temp_pile.cards.length > 0
-		|| (cur_effect == 'j' && !cur_mods.includes('i') && !(estack.length > 0 && estack[0].i >= estack[0].str.length))
-		|| (cur_effect == 'c' && !(cur_mods.includes('3') && temp_pile.cards.length == 0))
-		|| (estack.length > 0 && estack[0].to_send);
+		|| (cur_effect == 'j' && !cur_mods.includes('i'))
+		|| (cur_effect == 'c' && !cur_mods.includes('i'))
+		|| estack[0].to_send;
 }
 
 // used to continue an effect after dragging an effect icon to a target
@@ -1159,6 +1205,7 @@ function place_on_board(from, from_i, to, to_i) {
 	//temp_pile.card_states[1] = to.card_states[other_spot];
 	// resolve an effect with a pre-filled target to play a card to the target and junk the other
 	push_effect("j(3)c(3fi)", to, to_i);
+	estack[0].my_num_in_temp = 2;
 	estack[0].prev_target_pile = to;
 	estack[0].prev_target_i = other_spot;
 	resolve("j(3)c(3fi)", to, to_i, true);
@@ -1354,24 +1401,14 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		play_cost = 0;
 	var is_person = card.id >= people_start_i && card.id < events_start_i;
 	if((!is_resolving() || cur_effect == 'c') && dragging_from == from && p1.water >= play_cost && pile == p1.board && turn % 2 == my_id && is_person) {
-		//if(is_resolving()) {
-			//var is_target = pile == estack[0].prev_target_pile && i == estack[0].prev_target_i;
-			//if(cur_effect == 'c' && cur_mods.includes('i') && !is_target)
-				//return false;
-			//pile.card_states[i] = from.card_states[0] != null ? from.card_states[0] : UNHARMED;
-		//}
-		//else
-			//pile.card_states[i] = UNHARMED;
 		var was_resolving = is_resolving(); // because placing a card can spawn an effect, check now
 		p1.water -= play_cost;
 		people_placed_this_turn += 1;
 		place_on_board(dragging_pile, 0, pile, i);
 		if(is_trait_active("Karli Blaze"))
 			pile.card_states[i] |= READY;
-		//if(from == temp_pile) // move down card_states
-			//from.card_states.splice(0, 1);
-		// on play abilities
-		if(card.abilities.length == 3) {
+		// on play abilities (don't trigger when dragging from temp - which happens with high ground and when playing on a full column)
+		if(card.abilities.length == 3 && from != temp_pile) {
 			resolve(card.abilities[2].effect, pile, i);
 		}
 		if(was_resolving) {
@@ -1425,10 +1462,17 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			if(pile.cards[i] == empty_i) return false;
 			pile.card_states[i] |= READY;
 		}
+		var resolving_placement = false;
 		if(card.id == punk_effect_i) {
 			if(pile != p1.board) return false;
 			if(i >= 6) return false;
+			var prev_num_effects = estack.length;
 			place_on_board(draw_pile, 0, pile, i);
+			if(estack.length > prev_num_effects) { // swap effects if we need to resolve replacement
+				var temp = estack[0];
+				estack[0] = estack[1];
+				estack[1] = temp;
+			}
 			p1.board.card_states[i] = FLIPPED;
 			people_placed_this_turn += 1;
 		}
@@ -1470,6 +1514,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 }
 
 function on_drag_to_discard(pile, i) {
+	if(turn <= -1) return false;
 	var cur_effect = estack.length > 0 ? estack[0].cur_effect : null;
 	var cur_mods = estack.length > 0 ? estack[0].mods : "";
 	if(!is_resolving() && dragging_from == p1.hand && turn % 2 == my_id) {
@@ -1526,9 +1571,10 @@ function on_drag_to_events(pile, i) {
 
 //////////////////// common card game stuff ////////////////////
 
-function drag_from_pile(pile, pileX, pileY) {
+function drag_from_pile(pile, pileX, pileY, draggable_end_i) {
 	if(!mouse.buttonsPressed[0]) return;
 	for(var i = 0; i < pile.cards.length; i++) {
+		if(draggable_end_i != -1 && i >= draggable_end_i) continue;
 		var xdiff = pile.xdiff * (i % pile.max_cols);
 		var ydiff = pile.ydiff * Math.floor(i / pile.max_cols);
 		var card_x = pileX + xdiff + pile.scrollX;
@@ -1624,21 +1670,33 @@ function render_pile(pile, pileX, pileY, reverse_order) {
 		var xdiff = pile.xdiff * (i % pile.max_cols);
 		var ydiff = pile.ydiff * Math.floor(i / pile.max_cols);
 		if(pile.card_states[j] & FLIPPED) {
-			card = cards[punk_i];
+			var is_camp = card.id >= camps_start_i && card.id < people_start_i;
+			if(is_camp)
+				card = cards[destroyed_camp_i];
+			else
+				card = cards[punk_i];
 		}
 		var deg = 0;
 		if(pile.card_states[j] & HARMED)
 			deg = 90;
-		//if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1)
-			//deg += 45;
-		render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
-			pileX + xdiff + pile.scrollX, pileY + ydiff, pile.card_width, pile.card_height,
-			pile.cards[j] < punk_i ? 10 : 1, deg);
-		if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1) {
-			card = cards[85];
+		// previous render method (didn't smoothly scale down)
+		if(card.id >= effects_start_i) { // still apply the no-smooth to effects cuz they're small to begin with and transparent
+			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i, pileX + xdiff + pile.scrollX, pileY + ydiff, pile.card_width, pile.card_height, 0, deg);
+		}
+		else {
+			// render three times to smoothly scale down - once from full to 3x scale, then 3x to 1.5x, then 1.5x to 1x
+			oc.width = pile.card_width * oc_scale;
+			oc.height = pile.card_height * oc_scale;
 			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
-				pileX + xdiff + pile.scrollX + pile.card_width/8, pileY + ydiff + pile.card_height / 4, pile.card_width*3/4, pile.card_height/2,
-				pile.cards[j] < punk_i ? 10 : 1, deg);
+				0, 0, oc.width, oc.height, 0, 0, octx);
+			octx.drawImage(oc, 0, 0, oc.width * 0.5, oc.height * 0.5);
+			DrawImage(oc, pileX + xdiff + pile.scrollX, pileY + ydiff, pile.card_width, pile.card_height,
+				0, 0, oc.width * 0.5, oc.height * 0.5, deg);
+		}
+		if(!(pile.card_states[j] & READY) && (pile == p1.board || pile == p2.board) && turn > -1) {
+			card = cards[ready_effect_i];
+			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
+				pileX + xdiff + pile.scrollX + pile.card_width/8, pileY + ydiff + pile.card_height / 4, pile.card_width*3/4, pile.card_height/2, 0, deg);
 		}
 	}
 }
@@ -1693,8 +1751,13 @@ function new_pile(uses_card_states, always_full, max_cols, max_cards, xd, yd, cw
 }
 
 function move_card(from, from_i, to, to_i) {
+	if(from == null) {
+		from = {cards: [from_i], always_full: false, uses_card_states: false};
+		from_i = 0;
+	}
 	// shuffle discard into new deck if deck empty
 	if(from == draw_pile && draw_pile.cards.length == 0) {
+		if(discard_pile.cards.length == 0) return; // no draw or discard, can't draw
 		for(var i = discard_pile.cards.length - 1; i >= 0; i--) {
 			draw_pile.cards.push(discard_pile.cards.splice(0, 1)[0]);
 		}
@@ -1731,7 +1794,7 @@ function move_card(from, from_i, to, to_i) {
 	}
 }
 
-function render_cropped_card(row_i, col_i, dims, whole_img_i, x, y, w, h, x_padd, deg) {
+function render_cropped_card(row_i, col_i, dims, whole_img_i, x, y, w, h, x_padd, deg, ctx2) {
 	var row = dims[row_i];
 	var card_x = row.topleft.x;
 	var card_y = row.topleft.y;
@@ -1745,7 +1808,7 @@ function render_cropped_card(row_i, col_i, dims, whole_img_i, x, y, w, h, x_padd
 	var sh = (1 - col_i/row.num_cards)*(row.botleft.y - row.topleft.y) +
 	             (col_i/row.num_cards)*(row.botright.y - row.topright.y);
 	if(deg == null) deg = 0;
-	DrawImage(imgs[whole_img_i], x, y, w, h, card_x, card_y, x_step - x_padd, sh, deg, null, null);
+	DrawImage(imgs[whole_img_i], x, y, w, h, card_x, card_y, x_step - x_padd, sh, deg, null, null, null, ctx2);
 }
 
 function applySeed(seedStr) {
@@ -1882,6 +1945,16 @@ function main() {
 	ctx = canvas.getContext("2d");
 	scaledCanvas = document.getElementById("scaledCanvas");
 	scaledCtx = scaledCanvas.getContext("2d");
+
+	// add meta tag that attemps to prevents pixel density shenanigans on moble
+		// also prevents default gestures like zoom and pan
+	var meta = document.createElement("meta");
+	meta.setAttribute('name','viewport');
+	var content = 'initial-scale=';
+	content += 1 / window.devicePixelRatio;
+	content += ',user-scalable=no';
+	meta.setAttribute('content', content);
+	document.getElementsByTagName('head')[0].appendChild(meta);
 
 	// handle canvas size
 	scaledCanvas.width = window.innerWidth;
