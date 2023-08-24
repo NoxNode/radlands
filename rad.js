@@ -521,7 +521,7 @@ function chat(chat_msg) {
 	socket.emit("chat", chat_msg);
 }
 
-function SendGameState(end_of_turn) {
+function SendGameState(end_of_turn, response) {
 	if(my_id > 1) return; // don't send anything as a spectator
 	packet_sequence_num += 1;
 	var pile_cards = [draw_pile.cards, discard_pile.cards,
@@ -537,6 +537,7 @@ function SendGameState(end_of_turn) {
 		pile_card_states:               pile_card_states,
 		end_of_turn:                    end_of_turn,
 		estack:                         estack,
+		response:                       response,
 		raiders_resolved_this_turn:     raiders_resolved_this_turn,
 		event_resolved_this_turn:       event_resolved_this_turn,
 		ability_used_this_turn:         ability_used_this_turn,
@@ -597,32 +598,34 @@ function ApplyGameState(game_state) {
 	them.events.cards   = game_state.pile_cards[8];
 	them.hand.cards     = game_state.pile_cards[9];
 	them.board.card_states    = game_state.pile_card_states[1];
+
+	// update estack
+	estack = [];
+	for(var i = 0; i < game_state.estack.length; i++)
+		estack.push(game_state.estack[i]);
 	// clear effects and temp if end of turn
 	if(game_state.end_of_turn) {
 		estack = [];
 		temp_pile.cards = [];
 	}
-
 	// if recent game state send was the end of a turn and its now our turn start it
 	if(game_state.end_of_turn && turn % 2 == my_id) {
 		start_turn();
 	}
-	// if they sent effects for us to do, resolve them
-	if(game_state.my_id != my_id && game_state.estack.length > 0 && game_state.estack[0].to_send) {
-		resolve(game_state.estack[0].to_send, null, null, false, false, true);
+	if(game_state.my_id != my_id && estack.length > 0 && estack[0].to_send) {
+		// if we're receiving the response to something we sent, be done with it and continue if need be
+		if(game_state.response) {
+			estack.splice(0, 1);
+			if(!is_continuing_later(estack[0].cur_effect, estack[0].mods))
+				continue_effect(estack[0].prev_target_pile, estack[0].prev_target_i);
+		}
+		else // if they sent effects for us to do, resolve them
+			resolve(game_state.estack[0].to_send, null, null, false, false, true);
 	}
-	// if we're receiving the results of a sent effect, be done with that effect
-	else if(game_state.my_id != my_id && estack.length > 0 && estack[0].to_send) {
-		estack.splice(0, 1);
-		if(estack.length > 0)
-			continue_effect(estack[0].prev_target_pile, estack[0].prev_target_i);
-	}
-	// if we're receiving an update of where we left off, apply our stack queue state
-	else if(estack.length == 0 && game_state.my_id == my_id) {
-		for(var i = 0; i < game_state.estack.length; i++)
-			estack.push(game_state.estack[i]);
-		if(estack.length > 0)
-			continue_effect(estack[0].prev_target_pile, estack[0].prev_target_i);
+	if(game_state.response && game_state.my_id == my_id) {
+		// if we're receiving our own response, clear the stack
+		estack = [];
+		temp_pile.cards = [];
 	}
 }
 
@@ -993,10 +996,10 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			continue;
 		}
 		if(cur_effect == '2') { // send effects for other player to resolve
+			estack[0].i = effect_str.length;
 			estack[0].to_send = effect_str.substring(i, effect_str.length);
 			if(is_logging) console.log("sending effect for other to do " + effect_str);
 			SendGameState();
-			estack[0].i = effect_str.length;
 			break;
 		}
 		if(cur_effect == 'w') { // water
@@ -1038,10 +1041,6 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			}
 		}
 		if(cur_effect == 'c') { // play card (handled by on_drag_to_board)
-			if(cur_effect == 'c' && cur_mods.includes('3') && !cur_mods.includes('i') && temp_pile.cards.length == 0) {
-				i = effect_str.length;
-				break;
-			}
 		}
 
 		// targeting effects (add an effect card to temp to drag to a card to target)
@@ -1151,6 +1150,12 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 	// pop effect if done with it
 	if(!is_continuing_later(cur_effect, cur_mods) && !repeating_effect && i >= effect_str.length) {
 		estack.splice(0, 1);
+		if(turn % 2 != my_id) { // if finishing a sent effect
+			SendGameState(false, true);
+			estack = [];
+			temp_pile.cards = [];
+			return;
+		}
 		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods)) { // continue down the stack if not empty yet
 			continue_effect(self_pile, self_i);
 		}
@@ -1164,12 +1169,12 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 
 function is_continuing_later(cur_effect, cur_mods) {
 	if(estack.length == 0) return false;
+	if(estack[0].to_send != null) return true;
 	if(estack[0].i >= estack[0].str.length) return false;
 	if(estack[0].success) return false;
 	return temp_pile.cards.length > 0
 		|| (cur_effect == 'j' && !cur_mods.includes('i'))
-		|| (cur_effect == 'c' && !cur_mods.includes('i'))
-		|| estack[0].to_send;
+		|| (cur_effect == 'c' && !cur_mods.includes('i'));
 }
 
 // used to continue an effect after dragging an effect icon to a target
@@ -1533,14 +1538,17 @@ function on_drag_to_discard(pile, i) {
 	var cur_mods = estack.length > 0 ? estack[0].mods : "";
 	if(!is_resolving() && dragging_from == p1.hand && turn % 2 == my_id) {
 		var card = cards[dragging_pile.cards[0]];
-		resolve(card.junk);
 		if(card.name == "Water Silo") {
 			move_card(dragging_pile, 0, p1.basics, 1);
 			dragging_pile.cards = [];
 			dragging_from = null;
 			return false;
 		}
-		return true;
+		move_card(dragging_pile, 0, discard_pile, 0);
+		dragging_pile.cards = [];
+		dragging_from = null;
+		resolve(card.junk);
+		return false;
 	}
 	var card = cards[dragging_pile.cards[0]];
 	if(is_resolving() && (cur_effect == 'j' || cur_effect == 'r' || cur_effect == 'p')) {

@@ -77,9 +77,10 @@ io.on('connection', (socket) => {
 		// if this is a connection to an existing lobby, keep track of and update this person with prev_state
 		sock_to_seed[socket.id] = seed;
 		lobbies[seed][id] = socket;
-		if(lobbies[seed].prev_state != null) {
+		if(lobbies[seed].prev_sent_state != null)
+			lobbies[seed][id].emit('state', lobbies[seed].prev_sent_state);
+		else if(lobbies[seed].prev_state != null)
 			lobbies[seed][id].emit('state', lobbies[seed].prev_state);
-		}
 		console.log("player " + id + " connected to game with seed " + seed);
 	});
 
@@ -92,6 +93,8 @@ io.on('connection', (socket) => {
 		var game_state = JSON.parse(state);
 		if(game_state.end_of_turn)
 			lobbies[seed].prev_state = state;
+		else if(game_state.estack.length > 0 && game_state.estack[0].to_send)
+			lobbies[seed].prev_sent_state = state;
 		var sender = game_state.my_id;
 		for(var i = 0; i <= 9; i++) {
 			if(sender == i) continue; // skip sender
@@ -113,6 +116,7 @@ io.on('connection', (socket) => {
 		if(seed == null) return;
 		if(lobbies[seed] == null) return;
 		var state = lobbies[seed].prev_state;
+		lobbies[seed].prev_sent_state = null;
 		for(var i = 0; i <= 9; i++) {
 			if(lobbies[seed][i] == null) continue; // skip untaken spectator slots
 			lobbies[seed][i].emit('state', state);
