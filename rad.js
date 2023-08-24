@@ -1,6 +1,6 @@
 /*
 ------ gameplay bugs -----
-
+{"packet_sequence_num":120,"my_id":0,"water":0,"turn":13,"pile_cards":[[55,52,46,51,54,43,50,58,57,69,56,73,70,39,42,50,71,49,70,42,53,60,52,47,67,62,66,74,56,68,39,65,55,64,63,40,48],[72,71,44,40,41,null,54,45,69,72,68,73,59],[3,0,-1],[-1,-1,-1,58,41,-1,7,24,16],[-1,74,1],[43,51,46,57,53,47],[2,-1,1],[-1,-1,-1,-1,-1,-1,32,34,22],[65,-1,-1],[49,48,61,44,45,0,67]],"pile_card_states":[[0,0,0,0,0,0,130,129,128],[0,0,0,0,0,0,128,128,128]],"end_of_turn":true,"estack":[],"raiders_resolved_this_turn":false,"event_resolved_this_turn":true,"ability_used_this_turn":true,"high_ground_resolved_this_turn":false,"people_placed_this_turn":2,"version":1}
 
 ------ visual bugs -----
 fix problem of non-turn player not being able to restore the same state until turn player does something
@@ -545,7 +545,7 @@ function SendGameState(end_of_turn, response) {
 		ability_used_this_turn:         ability_used_this_turn,
 		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
 		people_placed_this_turn:        people_placed_this_turn,
-		version: 1,
+		//version: 1,
 	};
 	socket.emit("state", JSON.stringify(game_state));
 	return game_state;
@@ -553,14 +553,8 @@ function SendGameState(end_of_turn, response) {
 
 function ApplyGameState(game_state) {
 	// adapt old game_states to new
-	if(game_state.version == null) {
-		for(var i = 0; i < game_state.pile_cards.length; i++) {
-			for(var j = 0; j < game_state.pile_cards[i].length; j++) {
-				if(game_state.pile_cards[i][j] < punk_i) continue;
-				game_state.pile_cards[i][j] += 1;
-			}
-		}
-	}
+	//if(game_state.version == null) {
+	//}
 	status_text = "";
 	if(is_logging) console.log("applying: ");
 	if(is_logging) console.log(game_state);
