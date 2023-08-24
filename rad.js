@@ -556,10 +556,10 @@ function SendGameState(end_of_turn) {
 function ApplyGameState(game_state) {
 	// adapt old game_states to new
 	if(game_state.version == null) {
-		for(var i = 0; i < game_state.piles.length; i++) {
-			for(var j = 0; j < game_state.piles[i].length; j++) {
-				if(game_state.piles[i][j] < punk_i) continue;
-				game_state.piles[i][j] += 1;
+		for(var i = 0; i < game_state.pile_cards.length; i++) {
+			for(var j = 0; j < game_state.pile_cards[i].length; j++) {
+				if(game_state.pile_cards[i][j] < punk_i) continue;
+				game_state.pile_cards[i][j] += 1;
 			}
 		}
 	}
