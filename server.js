@@ -91,8 +91,10 @@ io.on('connection', (socket) => {
 		if(lobbies[seed] == null) return;
 		// update the prev_state of the lobby and relay the state to others in the lobby
 		var game_state = JSON.parse(state);
-		if(game_state.end_of_turn)
+		if(game_state.end_of_turn) {
 			lobbies[seed].prev_state = state;
+			lobbies[seed].prev_sent_state = null;
+		}
 		else if(game_state.estack.length > 0 && game_state.estack[0].to_send)
 			lobbies[seed].prev_sent_state = state;
 		var sender = game_state.my_id;

@@ -126,6 +126,87 @@ common js/canvas stuff
 		m = camp
 		p = person/people
 		f = for freeeeee
+
+
+var audio = new Audio('audio_file.mp3');
+audio.play();
+
+------ sound attributions -----
+
+
+https://freesound.org/people/InspectorJ/sounds/411089/
+	https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3
+	"Bell, Candle Damper, A (H1).wav" by InspectorJ (www.jshaw.co.uk) of Freesound.org
+https://freesound.org/people/LuannWepener/sounds/326119/
+	https://cdn.freesound.org/previews/326/326119_5627725-lq.mp3
+	pump shotgun
+https://freesound.org/people/andrest2003/sounds/524912/
+	https://cdn.freesound.org/previews/524/524912_6324148-lq.mp3
+	gunshot
+https://freesound.org/people/mnslugger20/sounds/242846/
+	https://cdn.freesound.org/previews/242/242846_4121395-lq.mp3
+	gunning
+https://freesound.org/people/qubodup/sounds/172589/
+	https://cdn.freesound.org/previews/172/172589_71257-lq.mp3
+	restore
+https://freesound.org/people/jimbo555/sounds/630498/
+	https://cdn.freesound.org/previews/630/630498_10616645-lq.mp3
+	shuffling
+https://freesound.org/people/dersuperanton/sounds/434472/
+	https://cdn.freesound.org/previews/434/434472_1992856-lq.mp3
+	pickup card
+https://freesound.org/people/Johnny2810/sounds/559531/
+	https://cdn.freesound.org/previews/559/559531_9742122-lq.mp3
+	place card
+https://freesound.org/people/Splashdust/sounds/84322/
+	https://cdn.freesound.org/previews/84/84322_754949-lq.mp3
+	flip card
+https://freesound.org/people/mr333me/sounds/656005/
+	https://cdn.freesound.org/previews/656/656005_14420812-lq.mp3
+	rev engine
+https://freesound.org/people/squareal/sounds/237375/
+	https://cdn.freesound.org/previews/237/237375_1502374-lq.mp3
+	crash
+https://freesound.org/people/ejfortin/sounds/51826/
+	https://cdn.freesound.org/previews/51/51826_490973-lq.mp3
+	omen clock
+https://freesound.org/people/ultraaxvii/sounds/591155/
+	https://cdn.freesound.org/previews/591/591155_11076342-lq.mp3
+	blade slice
+https://freesound.org/people/thecoolcookie17/sounds/573047/
+	https://cdn.freesound.org/previews/573/573047_12946586-lq.mp3
+	baseball bat bonk
+https://freesound.org/people/tomaszblaszczyk/sounds/670839/
+	https://cdn.freesound.org/previews/670/670839_12717327-lq.mp3
+	deep crazy laugh
+https://freesound.org/people/derplayer/sounds/587174/
+	https://cdn.freesound.org/previews/587/587174_13123807-lq.mp3
+	explosion
+https://freesound.org/people/derplayer/sounds/587180/
+	https://cdn.freesound.org/previews/587/587180_13123807-lq.mp3
+	triple explosion
+https://freesound.org/people/InspectorJ/sounds/398719/
+	https://cdn.freesound.org/previews/398/398719_5121236-lq.mp3
+	water
+https://freesound.org/people/j1987/sounds/140715/
+	https://cdn.freesound.org/previews/140/140715_367313-lq.mp3
+	lit_fuse
+https://freesound.org/people/roscoetoon/sounds/26389/
+	https://cdn.freesound.org/previews/26/26389_186469-lq.mp3
+	shredder
+https://freesound.org/people/Breviceps/sounds/450616/
+	https://cdn.freesound.org/previews/450/450616_9159316-lq.mp3
+	error
+https://freesound.org/people/gastonrnr/sounds/476237/
+	https://cdn.freesound.org/previews/476/476237_9571129-lq.mp3
+	spooky laugh
+https://freesound.org/people/Thanra/sounds/141196/
+	https://cdn.freesound.org/previews/141/141196_2534855-lq.mp3
+	maniacal laugh
+https://freesound.org/people/Creeper_Ciller78/sounds/275997/
+	https://cdn.freesound.org/previews/275/275997_5142212-lq.mp3
+	spectral laugh
+
 */
 
 var imgs = [];
@@ -273,6 +354,53 @@ var effects_dims = [
 		botleft: {x: 1421, y: 465+75},   botright: {x: 1421+65, y: 465+75} },
 ];
 
+var sound_urls = [
+	"https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3",
+	"https://cdn.freesound.org/previews/326/326119_5627725-lq.mp3",
+	"https://cdn.freesound.org/previews/524/524912_6324148-lq.mp3",
+	"https://cdn.freesound.org/previews/172/172589_71257-lq.mp3",
+	"https://cdn.freesound.org/previews/630/630498_10616645-lq.mp3",
+	"https://cdn.freesound.org/previews/434/434472_1992856-lq.mp3",
+	"https://cdn.freesound.org/previews/559/559531_9742122-lq.mp3",
+	"https://cdn.freesound.org/previews/84/84322_754949-lq.mp3",
+	"https://cdn.freesound.org/previews/656/656005_14420812-lq.mp3",
+	"https://cdn.freesound.org/previews/237/237375_1502374-lq.mp3",
+	"https://cdn.freesound.org/previews/51/51826_490973-lq.mp3",
+	"https://cdn.freesound.org/previews/591/591155_11076342-lq.mp3",
+	"https://cdn.freesound.org/previews/573/573047_12946586-lq.mp3",
+	"https://cdn.freesound.org/previews/670/670839_12717327-lq.mp3",
+	"https://cdn.freesound.org/previews/587/587174_13123807-lq.mp3",
+	"https://cdn.freesound.org/previews/587/587180_13123807-lq.mp3",
+	"https://cdn.freesound.org/previews/398/398719_5121236-lq.mp3",
+	"https://cdn.freesound.org/previews/140/140715_367313-lq.mp3",
+	"https://cdn.freesound.org/previews/26/26389_186469-lq.mp3",
+	"https://cdn.freesound.org/previews/450/450616_9159316-lq.mp3",
+	"https://cdn.freesound.org/previews/242/242846_4121395-lq.mp3",
+	"assets/batter_up.mp3"
+];
+var sound_bell_i = 0;
+var sound_pump_shotgun_i = 1;
+var sound_gunshot_i = 2;
+var sound_restore_i = 3;
+var sound_shuffling_i = 4;
+var sound_pickup_card_i = 5;
+var sound_place_card_i = 6;
+var sound_flip_card_i = 7;
+var sound_rev_engine_i = 8;
+var sound_crash_i = 9;
+var sound_omen_clock_i = 10;
+var sound_blade_slice_i = 11;
+var sound_baseball_bat_bonk_i = 12;
+var sound_crazy_laugh_i = 13;
+var sound_explosion_i = 14;
+var sound_triple_explosion_i = 15;
+var sound_water_i = 16;
+var sound_lit_fuse_i = 17;
+var sound_shredder_i = 18;
+var sound_error_i = 19;
+var sound_gunning_i = 20;
+var sound_batter_up_i = 21;
+
 // gameplay constants
 var num_players = 2;
 var JUNK_WATER   = "w";
@@ -325,16 +453,16 @@ var cards = [
 	{id: 10, name: "Scud Launcher",     abilities: [{cost: 1, effect: "2d(1c)"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 0},
 	{id: 11, name: "Mercenary Camp",    abilities: [{cost: 2, effect: "2[jj]k(1c)"}],                         initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 1},
 	{id: 12, name: "Garage",            abilities: [{cost: 1, effect: "a"}],                                  initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 2},
-	{id: 13, name: "Mulcher",           abilities: [{cost: 0, effect: "k(1p)t"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 3},
+	{id: 13, name: "Mulcher",           abilities: [{cost: 0, effect: "k(1p)t"}],                             initial_draw: 0, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 3, on_activate_sound: sound_shredder_i},
 	{id: 14, name: "Victory Totem",     abilities: [{cost: 2, effect: "i(2up)"}, {cost: 2, effect: "a"}],     initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 1, col_i: 4},
 	{id: 15, name: "Cache",             abilities: [{cost: 0, effect: "d(s)[p][r(1c)]t"}],                    initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 0},
-	{id: 16, name: "Blood Bank",        abilities: [{cost: 0, effect: "k(1p)w"}],                             initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 1},
-	{id: 17, name: "Reactor",           abilities: [{cost: 2, effect: "k(s)k(ap)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 2},
+	{id: 16, name: "Blood Bank",        abilities: [{cost: 0, effect: "k(1p)w"}],                             initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 1, on_resolve_sound: sound_water_i},
+	{id: 17, name: "Reactor",           abilities: [{cost: 2, effect: "k(s)k(ap)"}],                          initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 2, on_activate_sound: sound_explosion_i},
 	{id: 18, name: "Cannon",            abilities: [{cost: 1, effect: "d(s)d(2uc)"}],                         initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 3},
 	{id: 19, name: "Adrenaline Lab",    abilities: [{cost: 0, effect: "b(1dp)k(i)"}],                         initial_draw: 1, img_i: camps1_i,  dims: camps1_dims,  row_i: 2, col_i: 4},
 	// camps2
 	{id: 20, name: "Nest of Spies",     abilities: [{cost: 1, effect: "?(mp):d(2uc)"}],                       initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 0},
-	{id: 21, name: "Omen Clock",        abilities: [{cost: 1, effect: "v(v)"}],                               initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 1},
+	{id: 21, name: "Omen Clock",        abilities: [{cost: 1, effect: "v(v)"}],                               initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 1, on_activate_sound: sound_omen_clock_i},
 	{id: 22, name: "Scavenger Camp",    abilities: [{cost: 2, effect: "a"}, {cost: 1, effect: "?(r):r(1c)"}], initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 2},
 	{id: 23, name: "Training Camp",     abilities: [{cost: 1, effect: "f(1np)?(iv)::j(i)pw"}],                initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 3},
 	{id: 24, name: "Oasis",             abilities: [],                                                        initial_draw: 1, img_i: camps2_i,  dims: camps2_dims,  row_i: 0, col_i: 4},
@@ -360,12 +488,12 @@ var cards = [
 	{id: 42, name: "Cult Leader",       abilities: [{cost: 0, effect: "k(1p)d(2uc)"}],                        play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 3},
 	{id: 43, name: "Pyromaniac",        abilities: [{cost: 1, effect: "d(2um)"}],                             play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 4},
 	{id: 44, name: "Mutant",            abilities: [{cost: 0, effect: "d(2uc)r(1c)d(s)"}],                    play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 0},
-	{id: 45, name: "Vigilante",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 1},
-	{id: 46, name: "Gunner",            abilities: [{cost: 2, effect: "i(a2up)"}],                            play_cost: 1, junk: JUNK_RESTORE, img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 2},
-	{id: 47, name: "Assassin",          abilities: [{cost: 2, effect: "k(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 3},
+	{id: 45, name: "Vigilante",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 1, on_activate_sound: sound_batter_up_i, on_resolve_sound: sound_baseball_bat_bonk_i},
+	{id: 46, name: "Gunner",            abilities: [{cost: 2, effect: "i(a2up)"}],                            play_cost: 1, junk: JUNK_RESTORE, img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 2, on_resolve_sound: sound_gunning_i},
+	{id: 47, name: "Assassin",          abilities: [{cost: 2, effect: "k(2up)"}],                             play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 3, on_resolve_sound: sound_blade_slice_i},
 	{id: 48, name: "Rabble Rouser",     abilities: [{cost: 1, effect: "p"}, {cost: 1, effect: "?(p):d(2uc)"}],play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 1, col_i: 4},
 	{id: 49, name: "Doomsayer",         abilities: [{cost: 1, effect: "?(2v):d(2uc)"},null,{effect:"v(z)"}],  play_cost: 1, junk: JUNK_DRAW   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 0},
-	{id: 50, name: "Scientist",         abilities: [{cost: 1, effect: "t(4)t(4)t(4)j(3)j(3)b(3j)"}],          play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 1},
+	{id: 50, name: "Scientist",         abilities: [{cost: 1, effect: "t(4)t(4)t(4)j(3)j(3)b(3j)"}],          play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 1, on_activate_sound: sound_crazy_laugh_i},
 	{id: 51, name: "Vanguard",          abilities: [{cost: 1, effect: "d(2uc)2d(2uc)"},null,{effect:"p"}],    play_cost: 1, junk: JUNK_RAID   , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 2},
 	{id: 52, name: "Looter",            abilities: [{cost: 2, effect: "d(2uc)?(im):t"}],                      play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 3},
 	{id: 53, name: "Scout",             abilities: [{cost: 1, effect: "a"}],                                  play_cost: 1, junk: JUNK_WATER  , img_i: people1_i, dims: people1_dims, row_i: 2, col_i: 4},
@@ -375,37 +503,37 @@ var cards = [
 	{id: 56, name: "Rescue Team",       abilities: [{cost: 0, effect: "h(1p)"},null,{effect:"m(s)"}],         play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 2},
 	{id: 57, name: "Repair Bot",        abilities: [{cost: 2, effect: "r(1c)"},null,{effect:"r(1c)"}],        play_cost: 1, junk: JUNK_INJUR  , img_i: people2_i, dims: people2_dims, row_i: 0, col_i: 3},
 	{id: 58, name: "Holdout",           abilities: [{cost: 1, effect: "d(2uc)"}],                             play_cost: 2, junk: JUNK_RAID   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 0},
-	{id: 59, name: "Vera Vosh",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 1},
-	{id: 60, name: "Zeto Khan",         abilities: [{cost: 1, effect: "tttjjj"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 2},
-	{id: 61, name: "Argo Yesky",        abilities: [{cost: 1, effect: "d(2uc)"},null,{effect:"p"}],           play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 3},
-	{id: 62, name: "Magnus Karv",       abilities: [{cost: 2, effect: "d(2lc)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 0},
-	{id: 63, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1},
-	{id: 64, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2uc)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2},
+	{id: 59, name: "Vera Vosh",         abilities: [{cost: 1, effect: "i(2up)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 1, on_play_sound: sound_pump_shotgun_i},
+	{id: 60, name: "Zeto Khan",         abilities: [{cost: 1, effect: "tttjjj"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 2, on_play_sound: sound_lit_fuse_i},
+	{id: 61, name: "Argo Yesky",        abilities: [{cost: 1, effect: "d(2uc)"},null,{effect:"p"}],           play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 1, col_i: 3, on_play_sound: sound_gunning_i},
+	{id: 62, name: "Magnus Karv",       abilities: [{cost: 2, effect: "d(2lc)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 0, on_play_sound: sound_blade_slice_i, on_resolve_sound: sound_blade_slice_i},
+	{id: 63, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1, on_play_sound: sound_explosion_i, on_resolve_sound: sound_explosion_i},
+	{id: 64, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2uc)"}],                             play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2, on_play_sound: sound_batter_up_i, on_resolve_sound: sound_baseball_bat_bonk_i},
 	// events
 	{id: 65, name: "High Ground",       delay: 1, effect: "h(4a1p*)*c(3f)",                                   play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
 	{id: 66, name: "Banish",            delay: 1, effect: "k(2p)",                                            play_cost: 1, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 1},
 	{id: 67, name: "Interrogate",       delay: 0, effect: "t(4)t(4)t(4)t(4)j(3)j(3)j(3)h(3)",                 play_cost: 1, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 2},
 	{id: 68, name: "Famine",            delay: 1, effect: "{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}",            play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 3},
 	{id: 69, name: "Uprising",          delay: 2, effect: "ppp",                                              play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 4},
-	{id: 70, name: "Strafe",            delay: 0, effect: "i(a2up)",                                          play_cost: 2, junk: JUNK_DRAW   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 0},
+	{id: 70, name: "Strafe",            delay: 0, effect: "i(a2up)",                                          play_cost: 2, junk: JUNK_DRAW   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 0, on_resolve_sound: sound_gunning_i},
 	{id: 71, name: "Truce",             delay: 0, effect: "h(a1p)2h(a1p)",                                    play_cost: 2, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 1},
 	{id: 72, name: "Radiation",         delay: 1, effect: "i(ap)",                                            play_cost: 2, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 2},
 	{id: 73, name: "Napalm",            delay: 1, effect: "k(2lp)",                                           play_cost: 2, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 3},
-	{id: 74, name: "Bombardment",       delay: 3, effect: "d(a2m)?(26mk):t?(27mk):t?(28mk):t",                play_cost: 4, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 4},
+	{id: 74, name: "Bombardment",       delay: 3, effect: "d(a2m)?(26mk):t?(27mk):t?(28mk):t",                play_cost: 4, junk: JUNK_RESTORE, img_i: events_i,  dims: events_dims,  row_i: 1, col_i: 4, on_resolve_sound: sound_triple_explosion_i},
 	// effects
-	{id: 75, name: "Destroy",           effect: "k",    img_i: effects_i, dims: effects_dims, row_i: 0,  col_i: 0},
-	{id: 76, name: "To Hand",           effect: "h",    img_i: effects_i, dims: effects_dims, row_i: 1,  col_i: 0},
-	{id: 77, name: "Flip",              effect: "f",    img_i: effects_i, dims: effects_dims, row_i: 2,  col_i: 0},
+	{id: 75, name: "Destroy",           effect: "k",    img_i: effects_i, dims: effects_dims, row_i: 0,  col_i: 0, on_activate_sound: sound_lit_fuse_i, on_resolve_sound: sound_explosion_i},
+	{id: 76, name: "To Hand",           effect: "h",    img_i: effects_i, dims: effects_dims, row_i: 1,  col_i: 0, on_resolve_sound: sound_pickup_card_i},
+	{id: 77, name: "Flip",              effect: "f",    img_i: effects_i, dims: effects_dims, row_i: 2,  col_i: 0, on_resolve_sound: sound_flip_card_i},
 	{id: 78, name: "Advance",           effect: "v(v)", img_i: effects_i, dims: effects_dims, row_i: 3,  col_i: 0},
-	{id: 79, name: "Play",              effect: "c",    img_i: effects_i, dims: effects_dims, row_i: 4,  col_i: 0},
+	{id: 79, name: "Play",              effect: "c",    img_i: effects_i, dims: effects_dims, row_i: 4,  col_i: 0, on_resolve_sound: sound_place_card_i},
 	{id: 80, name: "Use Ability",       effect: "b",    img_i: effects_i, dims: effects_dims, row_i: 5,  col_i: 0},
-	{id: 81, name: "Damage",            effect: "d",    img_i: effects_i, dims: effects_dims, row_i: 6,  col_i: 0},
-	{id: 82, name: "Injur",             effect: "i",    img_i: effects_i, dims: effects_dims, row_i: 7,  col_i: 0},
-	{id: 83, name: "Restore",           effect: "r",    img_i: effects_i, dims: effects_dims, row_i: 8,  col_i: 0},
-	{id: 84, name: "Draw",              effect: "t",    img_i: effects_i, dims: effects_dims, row_i: 9,  col_i: 0},
-	{id: 85, name: "Punk",              effect: "p",    img_i: effects_i, dims: effects_dims, row_i: 10, col_i: 0},
+	{id: 81, name: "Damage",            effect: "d",    img_i: effects_i, dims: effects_dims, row_i: 6,  col_i: 0, on_activate_sound: sound_pump_shotgun_i, on_resolve_sound: sound_gunshot_i},
+	{id: 82, name: "Injur",             effect: "i",    img_i: effects_i, dims: effects_dims, row_i: 7,  col_i: 0, on_activate_sound: sound_pump_shotgun_i, on_resolve_sound: sound_gunshot_i},
+	{id: 83, name: "Restore",           effect: "r",    img_i: effects_i, dims: effects_dims, row_i: 8,  col_i: 0, on_resolve_sound: sound_restore_i},
+	{id: 84, name: "Draw",              effect: "t",    img_i: effects_i, dims: effects_dims, row_i: 9,  col_i: 0, on_resolve_sound: sound_pickup_card_i},
+	{id: 85, name: "Punk",              effect: "p",    img_i: effects_i, dims: effects_dims, row_i: 10, col_i: 0, on_resolve_sound: sound_place_card_i},
 	{id: 86, name: "Make Ready",        effect: "m",    img_i: effects_i, dims: effects_dims, row_i: 11, col_i: 0},
-	{id: 87, name: "Water",             effect: "w",    img_i: effects_i, dims: effects_dims, row_i: 12, col_i: 0},
+	{id: 87, name: "Water",             effect: "w",    img_i: effects_i, dims: effects_dims, row_i: 12, col_i: 0, on_resolve_sound: sound_water_i},
 ];
 
 // gamestate vars
@@ -423,9 +551,11 @@ var packet_sequence_num = 0;
 // this_turn trackers
 var raiders_resolved_this_turn     = false;
 var event_resolved_this_turn       = false;
+var event_played_this_turn         = false;
 var ability_used_this_turn         = false;
 var high_ground_resolved_this_turn = false;
 var people_placed_this_turn        = 0;
+var prev_sound_played_i = -1;
 
 // ui vars
 var dragging_pile = null;
@@ -436,6 +566,7 @@ var is_logging    = false;
 var oc = null;
 var octx = null;
 var oc_scale = 3;
+var sounds = [];
 
 function Init() {
 	// connect to server and set up listeners
@@ -459,6 +590,10 @@ function Init() {
 		var img = document.getElementById("img" + i);
 		if(img == null) break;
 		imgs.push(img);
+	}
+	// fill sounds array
+	for(var i = 0; i < sound_urls.length; i++) {
+		sounds.push(new Audio(sound_urls[i]));
 	}
 	// init offscreen canvas and context for an intermediate for drawing cards for smooth scaling
 	oc = document.createElement("canvas");
@@ -542,11 +677,14 @@ function SendGameState(end_of_turn, response) {
 		response:                       response,
 		raiders_resolved_this_turn:     raiders_resolved_this_turn,
 		event_resolved_this_turn:       event_resolved_this_turn,
+		event_played_this_turn:         event_played_this_turn,
 		ability_used_this_turn:         ability_used_this_turn,
 		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
 		people_placed_this_turn:        people_placed_this_turn,
+		prev_sound_played_i:            prev_sound_played_i,
 		//version: 1,
 	};
+	prev_sound_played_i = -1;
 	socket.emit("state", JSON.stringify(game_state));
 	return game_state;
 }
@@ -567,9 +705,14 @@ function ApplyGameState(game_state) {
 	turn = game_state.turn;
 	raiders_resolved_this_turn     = game_state.raiders_resolved_this_turn;
 	event_resolved_this_turn       = game_state.event_resolved_this_turn;
+	event_played_this_turn         = game_state.event_played_this_turn;
 	ability_used_this_turn         = game_state.ability_used_this_turn;
 	high_ground_resolved_this_turn = game_state.high_ground_resolved_this_turn;
 	people_placed_this_turn        = game_state.people_placed_this_turn;
+	// play prev_sound_played_i from other player
+	if(game_state.my_id != my_id && game_state.prev_sound_played_i != null && game_state.prev_sound_played_i != -1) {
+		PlaySound(sounds[game_state.prev_sound_played_i]);
+	}
 	// update cards
 	var me = p1;
 	var them = p2;
@@ -615,17 +758,22 @@ function ApplyGameState(game_state) {
 			if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods))
 				continue_effect(estack[0].prev_target_pile, estack[0].prev_target_i);
 		}
-		else // if they sent effects for us to do, resolve them
+		else { // if they sent effects for us to do, resolve them
+			temp_pile.cards = [];
+			PlaySound(sounds[sound_bell_i], true);
 			resolve(game_state.estack[0].to_send, null, null, false, false, true);
+		}
 	}
 	if(game_state.response && game_state.my_id == my_id) {
 		// if we're receiving our own response, clear the stack
 		estack = [];
 		temp_pile.cards = [];
 	}
+	prev_sound_played_i = -1;
 }
 
 function start_turn() {
+	PlaySound(sounds[sound_bell_i], true);
 	starting_turn = true;
 	if(turn == 0) {
 		// draw initial cards
@@ -642,9 +790,11 @@ function start_turn() {
 	}
 	raiders_resolved_this_turn = false;
 	event_resolved_this_turn = false;
+	event_played_this_turn = false;
 	ability_used_this_turn = false;
 	high_ground_resolved_this_turn = false;
 	people_placed_this_turn = 0;
+	prev_sound_played_i = -1;
 	// ready camps and unharmed people or punks
 	for(var i = 0; i < p1.board.card_states.length; i++) {
 		if(p1.board.cards[i] == empty_i)
@@ -674,12 +824,12 @@ function start_turn() {
 			break;
 		}
 	}
-	starting_turn = false;
 	// finish resolving 1st slot of events
 	if(temp_pile.cards.length > 0)
 		place_on_events(temp_pile, 0, p1.events, -1, true);
-	else // send all updates at once (already will if resolving an event)
-		SendGameState();
+	starting_turn = false;
+	// send all updates at once (already will if resolving an event)
+	SendGameState();
 }
 
 function end_turn() {
@@ -710,6 +860,7 @@ function end_turn() {
 	}
 	turn++;
 	if(is_logging) console.log("sending at end of turn: ");
+	prev_sound_played_i = -1;
 	SendGameState(true);
 	if(turn % 2 == my_id)
 		start_turn();
@@ -871,7 +1022,7 @@ function Update() {
 		else if(cur_effect == 'r') help_text += "restore";
 		else if(cur_effect == 'p') help_text += "play a punk";
 		else if(cur_effect == 'd') help_text += "damage";
-		else if(cur_effect == 'k') help_text += "destory";
+		else if(cur_effect == 'k') help_text += "destroy";
 		else if(cur_effect == 'f') help_text += "flip over";
 		else if(cur_effect == 'm') help_text += "make ready";
 		else if(cur_effect == 'h' && !cur_mods.includes('4')) help_text += "send to hand";
@@ -916,6 +1067,10 @@ function Update() {
 	// if none of our drag_to_pile targets took the dragged card, move it back
 	if(dragging_pile.cards.length > 0 && mouse.buttonsReleased[0]) {
 		move_card(dragging_pile, 0, dragging_from, 0);
+		if(dragging_from == temp_pile)
+			PlaySound(sounds[sound_error_i], true);
+		else
+			PlaySound(sounds[sound_place_card_i], true);
 	}
 	ResetInput();
 	if(scaledCanvas.height > scaledCanvas.width)
@@ -945,6 +1100,10 @@ function push_effect(effect_str, self_pile, self_i) {
 		prev_total_in_temp: temp_pile.cards.length,
 	};
 	estack.splice(0, 0, new_effect);
+	var source_card = self_pile != null && self_pile.cards[self_i] != empty_i ? cards[self_pile.cards[self_i]] : null;
+	if(source_card != null && source_card.on_activate_sound != null) {
+		PlaySound(sounds[source_card.on_activate_sound]);
+	}
 }
 
 function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_effect, sent_to_us) {
@@ -1204,7 +1363,8 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 	if(!is_continuing_later(cur_effect, cur_mods) && !repeating_effect && i >= effect_str.length) {
 		estack.splice(0, 1);
 		if(turn % 2 != my_id) { // if finishing a sent effect
-			SendGameState(false, true);
+			if(!starting_turn)
+				SendGameState(false, true);
 			estack = [];
 			temp_pile.cards = [];
 			return;
@@ -1279,17 +1439,22 @@ function place_on_events(from, from_i, to, to_i, override_correct) {
 	if(card == null) return;
 	var correct_spot = card.delay - 1;
 	if(override_correct) correct_spot = to_i;
-	if(is_trait_active("Zeto Khan") && !event_resolved_this_turn) correct_spot = -1;
+	if(is_trait_active("Zeto Khan") && !event_played_this_turn) correct_spot = -1;
 	// resolve right away if 0 delay event
 	if(correct_spot == -1) {
 		event_resolved_this_turn = true;
+		if(from != p1.events)
+			event_played_this_turn = true;
 		var new_to = discard_pile;
 		var new_to_i = 0;
 		if(card.name == "Raiders") {
 			raiders_resolved_this_turn = true;
 			new_to = p1.basics;
 			new_to_i = 2;
+			PlaySound(sounds[sound_crash_i]);
 		}
+		else if(card.on_resolve_sound != null)
+			PlaySound(sounds[card.on_resolve_sound]);
 		// move before resolve so they get the move when we send state before effect
 		move_card(from, from_i, new_to, new_to_i);
 		if(to == p2.board) // triggered if omen clock advanced an enemy event
@@ -1310,6 +1475,15 @@ function place_on_events(from, from_i, to, to_i, override_correct) {
 	}
 	if(!placed) {
 		status_text = "cannot play event when queue at that delay+ is taken";
+	}
+	// play sound for placing an event
+	if(!starting_turn) {
+		if(card.name == "Raiders")
+			PlaySound(sounds[sound_rev_engine_i]);
+		else if(card.on_activate_sound != null)
+			PlaySound(sounds[card.on_activate_sound]);
+		else
+			PlaySound(sounds[sound_lit_fuse_i]);
 	}
 }
 
@@ -1469,12 +1643,18 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		if(is_trait_active("Karli Blaze"))
 			pile.card_states[i] |= READY;
 		var prev_estack_len = estack.length;
-		// on play abilities (don't trigger when dragging from temp - which happens with high ground and when playing on a full column)
-		if(card.abilities.length == 3 && from != temp_pile) {
+		// before-placement on play abilities (don't trigger when dragging from temp)
+		var resolved_on_play_already = false;
+		if(card.abilities.length == 3 && from != temp_pile && !card.abilities[2].effect.includes('s')) {
 			resolve(card.abilities[2].effect, pile, i);
+			resolved_on_play_already = true;
 		}
 		// place on board (potentially get the replacement effect if played on full column)
 		place_on_board(dragging_pile, 0, pile, i);
+		// after-placement on play abilities (don't trigger when dragging from temp)
+		if(!resolved_on_play_already && card.abilities.length == 3 && from != temp_pile) {
+			resolve(card.abilities[2].effect, pile, i);
+		}
 		if(is_continuing_later(cur_effect, cur_mods) && estack[0].str[estack[0].i - 1] == '*' && estack[0].str.indexOf('*') != estack[0].i - 1) {
 			// if we're resolving an any_num that requires targeting, decrement any_num
 			estack[0].any_num -= 1;
@@ -1576,11 +1756,11 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			//if(to == temp_pile)
 				//temp_pile.card_states[0] = from.card_states[i];
 		}
+		if(effect_only) return true;
 		if(cur_mods.includes('l')) {
 			on_drag_to_board(pile, (i + 3) % 9, where_on_card, true);
 			on_drag_to_board(pile, (i + 6) % 9, where_on_card, true);
 		}
-		if(effect_only) return true;
 		continue_effect(pile, i);
 		return false;
 	}
@@ -1630,7 +1810,7 @@ function on_drag_to_discard(pile, i) {
 
 function on_drag_to_events(pile, i) {
 	var card = cards[dragging_pile.cards[0]];
-	if(!is_resolving() && dragging_from == p1.hand && p1.water >= card.play_cost && pile == p1.events) {
+	if(!is_resolving() && dragging_from == p1.hand && p1.water >= card.play_cost && pile == p1.events && card.id >= events_start_i && card.id < effects_start_i) {
 		p1.water -= card.play_cost;
 		place_on_events(dragging_pile, 0, pile);
 	}
@@ -1659,6 +1839,12 @@ function drag_from_pile(pile, pileX, pileY, draggable_end_i) {
 		var mouse_on_card = mouse.x > card_x && mouse.x < card_x + pile.card_width &&
 		                    mouse.y > card_y && mouse.y < card_y + pile.card_height;
 		if(mouse_on_card) {
+			var card = cards[pile.cards[i]];
+			var source_card = estack.length > 0 && estack[0].self_pile != null && estack[0].self_pile.cards[estack[0].self_i] != empty_i ? cards[estack[0].self_pile.cards[estack[0].self_i]] : null;
+			if(pile == temp_pile && card.id >= effects_start_i && card.on_activate_sound != null && !(source_card != null && source_card.on_activate_sound != null))
+				PlaySound(sounds[card.on_activate_sound], true);
+			else
+				PlaySound(sounds[sound_pickup_card_i], true);
 			move_card(pile, i, dragging_pile, 0);
 			dragging_from = pile;
 		}
@@ -1675,6 +1861,7 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 			if(on_drag != null && !on_drag(pile)) return;
 			move_card(dragging_pile, 0, pile, 0);
 			dragging_from = null;
+			PlaySound(sounds[sound_place_card_i], true);
 		}
 		return;
 	}
@@ -1689,10 +1876,26 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 		var mouse_on_card = mouse.x > card_x && mouse.x < card_x + pile.card_width &&
 		                    mouse.y > card_y && mouse.y < card_y + pile.card_height;
 		if(mouse_on_card) {
+			var dragging_card = cards[dragging_pile.cards[0]];
+			var was_dragging_from = dragging_from;
+			var source_card = estack.length > 0 && estack[0].self_pile != null && estack[0].self_pile.cards[estack[0].self_i] != empty_i ? cards[estack[0].self_pile.cards[estack[0].self_i]] : null;
 			var where_on_card = {x: mouse.x - card_x, y: mouse.y - card_y};
-			if(on_drag != null && !on_drag(pile, j, where_on_card)) return;
-			move_card(dragging_pile, 0, pile, j);
-			dragging_from = null;
+			starting_turn = true;
+			if(on_drag != null) on_drag(pile, j, where_on_card); // play on_drag if it exists
+			starting_turn = false; // defer sending gamestate to after we choose the sound
+			if(dragging_pile.cards.length > 0) return; // if didn't take the card, don't play a sound
+			if(was_dragging_from == temp_pile && source_card != null && source_card.on_resolve_sound != null)
+				PlaySound(sounds[source_card.on_resolve_sound]);
+			else if(was_dragging_from == temp_pile && dragging_card.id >= effects_start_i && dragging_card.on_resolve_sound != null)
+				PlaySound(sounds[dragging_card.on_resolve_sound]);
+			else if(was_dragging_from == p1.hand && dragging_card.on_play_sound != null)
+				PlaySound(sounds[dragging_card.on_play_sound]);
+			else
+				PlaySound(sounds[sound_place_card_i]);
+			if(turn % 2 != my_id) // if finishing a sent effect
+				SendGameState(false, true);
+			else
+				SendGameState();
 		}
 	}
 }
@@ -1996,6 +2199,15 @@ function DoButton(text, callback, x, y, w, h) {
 	}
 	DrawRect(x, y, w, h, color);
 	DrawText(text, x + w/2, y + h/2 + text_scale/4, text_scale, "white", "center");
+}
+
+function PlaySound(sound, skip_sending) {
+	if(mouse.buttonsPressed.length == 0) return; // can't play sounds until user interacts with page
+	if(sound.playing)
+		sound.load();
+	sound.play();
+	if(!skip_sending)
+		prev_sound_played_i = sounds.indexOf(sound);
 }
 
 function ResetInput() {
