@@ -1097,6 +1097,8 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			}
 		}
 		if(cur_effect == 'c') { // play card (handled by on_drag_to_board)
+			if(cur_mods.includes('3') && !cur_mods.includes('i') && temp_pile.cards.length == 0)
+				continue;
 		}
 
 		// targeting effects (add an effect card to temp to drag to a card to target)
