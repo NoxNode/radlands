@@ -1,14 +1,7 @@
 /*
 ------ bugs -----
-parachute base vanguard
-	killed vanguard and gave him 2 damage
-parachute base cult leader to kill damaged vanguard
-	killed both and gave no damage
-mimic on mulgur with parachute base
-	killed mimic
-	only took 1 water
-if high ground played, can only move second person to a dedicated spot (probably something with 'i' and prev_target)
 fix problem of non-turn player not being able to restore the same state until turn player does something
+damaged cards in temp should have more space so they don't overlap other cards
 
 
 ----- features -----
@@ -35,6 +28,8 @@ within-turn history
 better messaging system
 make server just use the regular port 80
 	shortens url and steps to create google cloud server
+to clean up the replacement on full column effect, can make a mod that doesn't change the target
+	then just treat c(3fi) as another on_drag_to_board to target thing
 
 ----- file layout -----
 general funcs
@@ -385,7 +380,7 @@ var cards = [
 	{id: 63, name: "Molgur Stang",      abilities: [{cost: 1, effect: "k(2m)"}],                              play_cost: 4, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 1},
 	{id: 64, name: "Karli Blaze",       abilities: [{cost: 1, effect: "d(2u)"}],                              play_cost: 3, junk: JUNK_PUNK   , img_i: people2_i, dims: people2_dims, row_i: 2, col_i: 2},
 	// events
-	{id: 65, name: "High Ground",       delay: 1, effect: "h(4a1p*)c(3f)",                                    play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
+	{id: 65, name: "High Ground",       delay: 1, effect: "h(4a1p*)*c(3f)",                                   play_cost: 0, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 0},
 	{id: 66, name: "Banish",            delay: 1, effect: "k(2p)",                                            play_cost: 1, junk: JUNK_RAID   , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 1},
 	{id: 67, name: "Interrogate",       delay: 0, effect: "t(4)t(4)t(4)t(4)j(3)j(3)j(3)h(3)",                 play_cost: 1, junk: JUNK_WATER  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 2},
 	{id: 68, name: "Famine",            delay: 1, effect: "{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}",            play_cost: 1, junk: JUNK_INJUR  , img_i: events_i,  dims: events_dims,  row_i: 0, col_i: 3},
@@ -761,7 +756,7 @@ function Update() {
 	if(is_resolving()) {
 		if(estack[0].i > 0) {
 			var prev_effect = estack[0].str[estack[0].i - 1];
-			if(prev_effect == '[' || prev_effect == '*') {
+			if(prev_effect == '[' || (prev_effect == '*' && estack[0].str.indexOf('*') == estack[0].i - 1)) {
 				temp_width -= done_width - 10;
 				DoButton("Done", done_with_optionals, canvas.width - done_width, temp_yoff, done_width, card_height);
 			}
@@ -983,7 +978,14 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 				num_times--;
 			}
 			var repeat_start_i = i;
-			for(var j = 0; j < num_times; j++) {
+			estack[0].i = repeat_start_i;
+			resolve(effect_str, self_pile, self_i, true, true);
+			// if the thing we're repeating requires continuing later, just return and let it do its thing
+			if(is_continuing_later(estack[0].cur_effect, estack[0].mods)) {
+				return;
+			}
+			// finish the rest of the num_times for stuff we're continuing now
+			for(var j = 1; j < num_times; j++) {
 				estack[0].i = repeat_start_i;
 				resolve(effect_str, self_pile, self_i, true, true);
 			}
@@ -1053,7 +1055,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		if(cur_effect == 'm') move_card(null, ready_effect_i, temp_pile, 0);
 		if(cur_effect == 'b') move_card(null, ability_effect_i, temp_pile, 0);
 		// simulate drag from the effect card to the board for a,s,i,3,5 modifiers
-		if(temp_pile.cards.length > 0 && temp_pile.cards[0] >= effects_start_i &&
+		if(temp_pile.cards.length > 0 && temp_pile.cards[0] >= effects_start_i && cur_effect != 'b' &&
 		(cur_mods.includes('a') || cur_mods.includes('s') || cur_mods.includes('i') || cur_mods.includes('3') || cur_mods.includes('5'))) {
 			var effect_card_i = temp_pile.cards.splice(0, 1)[0];
 			dragging_pile.cards[0] = effect_card_i;
@@ -1149,7 +1151,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 	// pop effect if done with it
 	if(!is_continuing_later(cur_effect, cur_mods) && !repeating_effect && i >= effect_str.length) {
 		estack.splice(0, 1);
-		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].cur_mods)) { // continue down the stack if not empty yet
+		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods)) { // continue down the stack if not empty yet
 			continue_effect(self_pile, self_i);
 		}
 		if(estack.length == 0 && !starting_turn) {
@@ -1163,6 +1165,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 function is_continuing_later(cur_effect, cur_mods) {
 	if(estack.length == 0) return false;
 	if(estack[0].i >= estack[0].str.length) return false;
+	if(estack[0].success) return false;
 	return temp_pile.cards.length > 0
 		|| (cur_effect == 'j' && !cur_mods.includes('i'))
 		|| (cur_effect == 'c' && !cur_mods.includes('i'))
@@ -1401,22 +1404,33 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		play_cost = 0;
 	var is_person = card.id >= people_start_i && card.id < events_start_i;
 	if((!is_resolving() || cur_effect == 'c') && dragging_from == from && p1.water >= play_cost && pile == p1.board && turn % 2 == my_id && is_person) {
-		var was_resolving = is_resolving(); // because placing a card can spawn an effect, check now
 		p1.water -= play_cost;
-		people_placed_this_turn += 1;
-		place_on_board(dragging_pile, 0, pile, i);
+		if(from != temp_pile) // don't count rearranging as placing
+			people_placed_this_turn += 1;
 		if(is_trait_active("Karli Blaze"))
 			pile.card_states[i] |= READY;
+		var prev_estack_len = estack.length;
 		// on play abilities (don't trigger when dragging from temp - which happens with high ground and when playing on a full column)
 		if(card.abilities.length == 3 && from != temp_pile) {
 			resolve(card.abilities[2].effect, pile, i);
 		}
-		if(was_resolving) {
-			if(cur_effect == 'c' && cur_mods.includes('3') && !cur_mods.includes('i') && temp_pile.cards.length > 0) {
-				estack[0].i--;
-			}
-			continue_effect(pile, i);
+		// place on board (potentially get the replacement effect if played on full column)
+		place_on_board(dragging_pile, 0, pile, i);
+		if(is_continuing_later(cur_effect, cur_mods) && estack[0].str[estack[0].i - 1] == '*' && estack[0].str.indexOf('*') != estack[0].i - 1) {
+			// if we're resolving an any_num that requires targeting, decrement any_num
+			estack[0].any_num -= 1;
+			if(estack[0].any_num == 0) // if done with that targeting effect, continue
+				continue_effect(pile, i);
+			return false;
 		}
+		// if we got a new effect, see if we shouldn't continue that one
+		if(estack.length > prev_estack_len && is_continuing_later(estack[0].cur_effect, estack[0].mods)) {
+			if(estack.length - prev_estack_len < estack.length) // set the effect to play this card to be done so we don't replay it later
+				estack[estack.length - prev_estack_len].success = true;
+			return false;
+		}
+		// continue effects that didn't break out in the above 2 conditions
+		continue_effect(pile, i);
 		return false;
 	}
 	if(is_resolving() && card.id >= effects_start_i) {
