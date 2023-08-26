@@ -35,6 +35,7 @@
 - punks and restores are treated as always optional - if there's no "Done" button then drag them to the discard to skip them
 - when argo's trait is active, click the top half of the card for argo's ability
 - if you want to send a message to others in the lobby, you can press ctrl+shift+i then go to the "Console" tab then type chat("your message") and hit enter
+- if you want to save your game (in case the server is reset), press ctrl+shift+i then go to the "Console" tab then type SaveGame() and hit enter
 
 ## how to host your own free google cloud server
 - go to <https://console.cloud.google.com/>
