@@ -2357,7 +2357,7 @@ function DoButton(text, callback, x, y, w, h) {
 function PlaySound(sound, skip_sending) {
 	if(mouse.buttonsPressed.length == 0) return; // can't play sounds until user interacts with page
 	sound.currentTime = 0;
-	if(sound.readyState == 4) // 4 == HAVE_ENOUGH_DATA
+	if(sound.readyState >= 1) // 4 == HAVE_ENOUGH_DATA
 		sound.play();
 	if(!skip_sending)
 		prev_sound_played_i = sounds.indexOf(sound);
