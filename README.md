@@ -14,9 +14,6 @@
 - match-making: go to the /?match url and it'll put you in a custom lobby with the next person to also go to that url
 - choosing camps is treated as a turn (turn -2 and -1)
 - if there's a problem, try "Restart Turn", refresh the page, or go to a different lobby id
-- the online game doesn't end when the draw pile depletes twice - you can just declare a tie then if you want to follow the rulebook
-- all the cards in the discard pile are visible - if you want to follow the rulebook you can scroll it over so that only the top (left-most) card shows
-- because the url determines the starting player, camps are chosen after knowing who goes first (I don't think this is following the rulebook, but its easier to implement and I kinda like it this way)
 
 ## controls
 - drag cards to move them
@@ -24,17 +21,22 @@
 - hover cards to show close-up
 - right click and drag to scroll hand/discard/temp
 - to hover on mobile: touch nothing then drag around
-- to right click on mobile: touch nothing with 1 finger, then touch and drag with another
+- to scroll on mobile: touch nothing with 1 finger, then touch and drag with another
 - drag a card from hand to discard for the junk effect
 - when playing events, place them on any slot in the event queue (it'll go where it should)
 - when playing people, place them where you want them to go (people in the way will move)
-- when non-effect cards are in "Temp", discard the ones you don't want
-- when effect cards are in "Temp", drag them to the spot you're targeting
+- when non-effect-icon cards are in "Temp", discard the ones you don't want
+- when effect-icon cards are in "Temp", drag them to the spot you're targeting
 - when resolving optional effects, click "Done" to skip that option (last is mandatory if all others are skipped)
 - punks and restores are treated as always optional - if there's no "Done" button then drag them to the discard to skip them
 - when argo's trait is active, click the top half of the card for argo's ability
 - if you want to send a message to others in the lobby, you can press ctrl+shift+i then go to the "Console" tab then type chat("your message") and hit enter
 - if you want to save your game (in case the server is reset), press ctrl+shift+i then go to the "Console" tab then type SaveGame() and hit enter
+
+## deviations from rulebook
+- the online game doesn't end when the draw pile depletes twice - you can just declare a tie then if you want to follow the rulebook
+- all the cards in the discard pile are visible - if you want to follow the rulebook you can scroll it over so that only the top (left-most) card shows
+- because the url determines the starting player, camps are chosen after knowing who goes first (I don't think this is following the rulebook, but its easier to implement and I kinda like it this way)
 
 ## how to host your own free google cloud server
 - go to <https://console.cloud.google.com/>
