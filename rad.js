@@ -1,16 +1,23 @@
 /*
 ------ gameplay bugs -----
-
+napalm only kills 1
 
 ------ visual bugs -----
+still plays slice sound on vanguard play
 fix problem of non-turn player not being able to restore the same state until turn player does something
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
 
 ----- features TODO -----
+spectators should see both hands (can just replace Temp with the other hand)
 draft pick camps (draw 6 each, pick 1 then pass hand to opponent, repeat x2)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
-	if url starts with ?draft_ then treat it as any other lobby (match or custom) but draft start
+	could add a &draft=[true/false] to the url
+timed turns
+	could add a &timer=[seconds] to the url
+experimental rules
+	could add a &experimental=[true/false] to the url
+	if true, use new card defs and assets
 optimize assets
 	render cards in order of id into one big row jpg
 	render effects in order of id into one big row png
