@@ -93,7 +93,7 @@ bonfire should maybe cost 1 water
 juggernaut should maybe cost 3 water and only need to advance twice
 vera vosh and karli blaze should probably be reworked
 	vera could probably just be made into a 2 cost
-	karli could probably also be made into a 2 cost if their ability is 2 cost damage or 1 cost injur
+	karli could probably also be made into a 2 cost and change ability to 1 cost injur
 
 ----- file layout -----
 general funcs
