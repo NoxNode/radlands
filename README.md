@@ -28,7 +28,7 @@
 - when non-effect-icon cards are in "Temp", discard the ones you don't want
 - when effect-icon cards are in "Temp", drag them to the spot you're targeting
 - when resolving optional effects, click "Done" to skip that option (last is mandatory if all others are skipped)
-- punks and restores are treated as always optional - if there's no "Done" button then drag them to the discard to skip them
+- punks and restores are always optional - if there's no "Done" button, drag them to the discard to skip
 - when argo's trait is active, click the top half of the card for argo's ability
 - if you want to send a message to others in the lobby, you can press ctrl+shift+i then go to the "Console" tab then type chat("your message") and hit enter
 - if you want to save your game (in case the server is reset), press ctrl+shift+i then go to the "Console" tab then type SaveGame() and hit enter
