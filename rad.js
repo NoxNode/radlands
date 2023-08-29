@@ -7,7 +7,7 @@ fix problem of non-turn player not being able to restore the same state until tu
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
 
------ features -----
+----- features TODO -----
 draft pick camps (draw 6 each, pick 1 then pass hand to opponent, repeat x2)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
 	if url starts with ?draft_ then treat it as any other lobby (match or custom) but draft start
@@ -78,6 +78,22 @@ actual changes inspired by the above reasons
 	Pyromaniac  junk effect (injur -> draw)
 	I don't see a good matching draw -> injur change so the above would change the junk effect ratios
 		maybe just make famine or repair bot not change into water and we'd be down a water instead of injur junk
+inital draw changes
+	command post   2 -> 1
+	transplant lab 2 -> 1
+	parachute base 1 -> 0 (maybe)
+	oasis          1 -> 0 (maybe)
+	resonator      1 -> 2
+	blood bank     1 -> 2 (maybe)
+	railgun        0 -> 1
+	octagon        0 -> 1 (or make it cost 0 water)
+	watchtower     0 -> 1 (maybe)
+	nest of spies  1 -> 0 (if watchtower isn't buffed, nest of spies should maybe be nerfed)
+bonfire should maybe cost 1 water
+juggernaut should maybe cost 3 water and only need to advance twice
+vera vosh and karli blaze should probably be reworked
+	vera could probably just be made into a 2 cost
+	karli could probably also be made into a 2 cost if their ability is 2 cost damage or 1 cost injur
 
 ----- file layout -----
 general funcs
