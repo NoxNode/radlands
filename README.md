@@ -11,7 +11,7 @@
 ## notes
 - custom lobbies: the last digit of the above url is the player id (0 for first, 1 for second - can spectate by using 2-9)
 - custom lobbies: the stuff between the '?' and the last digit is the lobby id (and random seed)
-- match-making: go to the /?match url and it'll put you in a custom lobby with the next person to also go to that url
+- match-making: go to the /?match url and it'll put you in a custom lobby with the next person to go to that url
 - choosing camps is treated as a turn (turn -2 and -1)
 - if there's a problem, try "Restart Turn", refresh the page, or go to a different lobby id
 
