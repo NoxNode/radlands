@@ -97,7 +97,7 @@
 
 ## if the git fetch showed that server.js is updated, do this instead (existing games will be reset):
 - run the following command: ps aux
-- look in the table for the thing saying "node server.js" (copy the number on the 2nd-to-left-most column of that row)
+- look in the table for "node server.js" (copy the number on the 2nd-to-left-most column of that row)
 - run the following commands:
 - kill [that number you copied]
 - cd radlands (if you haven't already)
