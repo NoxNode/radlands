@@ -1,15 +1,13 @@
 /*
 ------ gameplay bugs -----
-napalm only kills 1
+
 
 ------ visual bugs -----
-still plays slice sound on vanguard play
 fix problem of non-turn player not being able to restore the same state until turn player does something
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
 
 ----- features TODO -----
-spectators should see both hands (can just replace Temp with the other hand)
 draft pick camps (draw 6 each, pick 1 then pass hand to opponent, repeat x2)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
 	could add a &draft=[true/false] to the url
@@ -24,6 +22,7 @@ optimize assets
 		https://stackoverflow.com/questions/11112321/how-to-save-canvas-as-png-image
 sound effects
 	make screaming sound inherent to k(1p), then on_resolve_sound can be for follow-ups
+		maybe change screaming to WITNESS ME to reference mad max fury road
 	more specific sounds for specific cards
 	match found sound (hard to do with the current redirect method)
 		need to do something like play the sound then redirect, but had problems playing a sound in that place of the code for some reason
@@ -1042,23 +1041,7 @@ function Update() {
 	DrawRect(0, 0, canvas.width, canvas.height, "black");
 
 	var my_turn = turn >= 0 && turn % num_players == my_id;
-	var temp_width = canvas.width;
-	var draggable_end_i = -1;
-	if(is_resolving()) {
-		var prev_effect = estack[0].i > 0 ? estack[0].str[estack[0].i - 1] : null;
-		if(prev_effect == '[' || (prev_effect == '*' && estack[0].str.indexOf('*') == estack[0].i - 1)) {
-			temp_width -= done_width - 10;
-			DoButton("Done", done_with_optionals, canvas.width - done_width, temp_yoff, done_width, card_height);
-		}
-		if(estack.length > 0) // done_with_optionals might make this false
-			draggable_end_i = estack[0].my_num_in_temp;
-	}
-	DrawRect(mat_endx, temp_yoff, temp_width - mat_endx - 10, card_height, "grey");
-	DrawText("Temp:", mat_endx, temp_yoff - 12, 24, "white");
-	render_pile(temp_pile, mat_endx, temp_yoff);
-	scroll_pile(temp_pile, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
-	drag_from_pile(temp_pile, mat_endx, temp_yoff, draggable_end_i);
-
+	// Control Buttons
 	if(my_turn) {
 		DoButton("Restart Turn", restart_turn, mat_endx + 10, 140, card_width * 2 + 10, card_width);
 	}
@@ -1070,24 +1053,52 @@ function Update() {
 	else
 		DoButton("Windowed", () => document.exitFullscreen(), mat_endx + 10, 140 + card_width * 2 + 20, card_width * 2 + 10, card_width);
 
+	// Temp or Player 0 Hand (for spectators)
+	if(my_id == 0 || my_id == 1) {
+		var temp_width = canvas.width;
+		var draggable_end_i = -1;
+		if(is_resolving()) {
+			var prev_effect = estack[0].i > 0 ? estack[0].str[estack[0].i - 1] : null;
+			if(prev_effect == '[' || (prev_effect == '*' && estack[0].str.indexOf('*') == estack[0].i - 1)) {
+				temp_width -= done_width - 10;
+				DoButton("Done", done_with_optionals, canvas.width - done_width, temp_yoff, done_width, card_height);
+			}
+			if(estack.length > 0) // done_with_optionals might make this false
+				draggable_end_i = estack[0].my_num_in_temp;
+		}
+		DrawRect(mat_endx, temp_yoff, temp_width - mat_endx - 10, card_height, "grey");
+		DrawText("Temp:", mat_endx, temp_yoff - 12, 24, "white");
+		render_pile(temp_pile, mat_endx, temp_yoff);
+		scroll_pile(temp_pile, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
+		drag_from_pile(temp_pile, mat_endx, temp_yoff, draggable_end_i);
+	}
+	else {
+		DrawRect(mat_endx, temp_yoff, canvas.width - mat_endx, card_height, "grey");
+		DrawText("Player 0 Hand:", mat_endx, temp_yoff - 12, 24, "white");
+		render_pile(p2.hand, mat_endx, temp_yoff);
+		scroll_pile(p2.hand, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
+	}
+	// Discard Pile
 	DrawRect(mat_endx, discard_yoff, canvas.width - mat_endx, card_height, "grey");
 	DrawText("Discard:", mat_endx, discard_yoff - 12, 24, "white");
 	render_pile(discard_pile, mat_endx, discard_yoff);
 	scroll_pile(discard_pile, mat_endx, discard_yoff, canvas.width, discard_yoff + card_height);
 	drag_to_pile(discard_pile, mat_endx, discard_yoff, on_drag_to_discard, canvas.width, discard_yoff + card_height);
-
+	// Self Hand / Player 1 Hand (for spectators)
 	DrawRect(mat_endx, canvas.height - card_height, canvas.width - mat_endx, card_height, "grey");
-	DrawText("Hand:", mat_endx, canvas.height - card_height - 12, 24, "white");
+	if(my_id == 0 || my_id == 1)
+		DrawText("Hand:", mat_endx, canvas.height - card_height - 12, 24, "white");
+	else
+		DrawText("Player 1 Hand:", mat_endx, canvas.height - card_height - 12, 24, "white");
 	render_pile(p1.hand, mat_endx, canvas.height - card_height);
 	scroll_pile(p1.hand, mat_endx, canvas.height - card_height, canvas.width, canvas.height);
 	if((!is_resolving() || estack[0].cur_effect == 'c' || estack[0].cur_effect == 'j'))
 		drag_from_pile(p1.hand, mat_endx, canvas.height - card_height);
-	
+
 	// render hovered card on top of temp, discard, and hand
 	hover_pile(temp_pile, mat_endx, temp_yoff);
 	hover_pile(discard_pile, mat_endx, discard_yoff);
 	hover_pile(p1.hand, mat_endx, canvas.height - card_height);
-
 	// render mats
 	var mat_w = 1920*(1695/1920)/2.15;
 	var mat_h = 1080*(950/1032)/2.15;
@@ -1104,11 +1115,12 @@ function Update() {
 			people_yoff = p2_people_yoff;
 			reverse_order = true;
 		}
+		// basics
 		render_pile(p.basics, basic_xoff, people_yoff, reverse_order);
 		hover_pile(p.basics, basic_xoff, people_yoff, reverse_order);
 		if(!is_resolving() && my_turn && i == 0)
 			click_pile(p.basics, basic_xoff, people_yoff, on_click_basic);
-
+		// board
 		if(turn <= -1 && i == 1) continue; // dont show enemy board before turn 0
 		render_pile(p.board, people_xoff, people_yoff, reverse_order);
 		hover_pile(p.board, people_xoff, people_yoff, reverse_order);
@@ -1116,9 +1128,7 @@ function Update() {
 			drag_to_pile(p.board, people_xoff, people_yoff, on_drag_to_board, null, null, reverse_order);
 		if(!is_resolving() && my_turn && i == 0)
 			click_pile(p.board, people_xoff, people_yoff, on_click_board);
-		//if(estack.length > 0 && estack[0].self_pile != null && estack[0].self_pile[estack[0].self_i] != null && cards[estack[0].self_pile[estack[0].self_i]].name == "High Ground")
-			//drag_from_pile(p1.board, people_xoff, people_yoff);
-
+		// events
 		render_pile(p.events, event_xoff, people_yoff, reverse_order);
 		hover_pile(p.events, event_xoff, people_yoff, reverse_order);
 		if(is_resolving() || turn <= -1 || my_turn)
@@ -1133,6 +1143,8 @@ function Update() {
 	DrawText("turn: " + turn, mat_endx + 10, 40 * 1, 24, "white");
 	DrawText("my_id: " + my_id, mat_endx + 10, 40 * 2, 24, "white");
 	DrawText(draw_pile.cards.length, basic_xoff + card_width/2 - 14, p1_people_yoff + card_height/2 + 14, 24, "white");
+
+	// status text / help text
 	if(turn == -1 && p1.hand.cards.length == 0) {
 		status_text = "waiting for opponent to choose camps...";
 	}
@@ -1197,11 +1209,22 @@ function Update() {
 			help_text += " or click Done";
 		if(prev_effect == '*' && estack[0].str.indexOf('*') == estack[0].i - 1)
 			help_text += " any number of times then click Done";
-
+		// adjust help text for spectators
+		if(my_id > 1) {
+			help_text = help_text.replace("their", "p0's");
+			help_text = help_text.replace("your", "p1's");
+			if(help_text.startsWith("waiting for opponent"))
+				help_text = "waiting for p0" + help_text.substring("waiting for opponent".length, help_text.length);
+			else
+				help_text = "waiting for p1 to " + help_text;
+		}
+		// only set status if help text is not empty
 		if(help_text != "")
 			status_text = help_text;
 		break;
 	}
+
+	// lose con
 	if((p1.board.card_states[6] & 3) == FLIPPED && (p1.board.card_states[7] & 3) == FLIPPED && (p1.board.card_states[8] & 3) == FLIPPED
 	&& is_camp(p1.board, 6) && is_camp(p1.board, 7) && is_camp(p1.board, 8)) {
 		status_text = "You Lost";
@@ -1220,6 +1243,7 @@ function Update() {
 			}
 		}
 	}
+	// win con
 	if((p2.board.card_states[6] & 3) == FLIPPED && (p2.board.card_states[7] & 3) == FLIPPED && (p2.board.card_states[8] & 3) == FLIPPED
 	&& is_camp(p2.board, 6) && is_camp(p2.board, 7) && is_camp(p2.board, 8)) {
 		status_text = "You Won!";
@@ -1242,9 +1266,9 @@ function Update() {
 	}
 	//status_text = innerWidth + ", " + innerHeight + " - " + mouse.x + ", " + mouse.y + " - " + outerHeight + ", " + screen.height + ", " + window.devicePixelRatio;
 	DrawText(status_text, mat_endx + 10, 40 * 3, 24, "white");
+
 	// render dragged card above everything
 	render_pile(dragging_pile, mouse.x - card_width/2, mouse.y - card_height/2);
-
 	// if none of our drag_to_pile targets took the dragged card, move it back
 	if(dragging_pile.cards.length > 0 && mouse.buttonsReleased[0]) {
 		move_card(dragging_pile, 0, dragging_from, 0);
@@ -1253,6 +1277,7 @@ function Update() {
 		else
 			PlaySound(sounds[sound_place_card_i], true);
 	}
+	// reset input and render from fixed size canvas to scaled canvas
 	ResetInput();
 	if(scaledCanvas.height > scaledCanvas.width)
 		DrawImage(myCanvas, scaledCanvas.width / 2, scaledCanvas.height / 2, scaledCanvas.height, scaledCanvas.width, 0, 0, canvas.width, canvas.height, -90, null, null, true, scaledCtx);
@@ -1408,7 +1433,6 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			p1.water += 1;
 			continue;
 		}
-
 		if(cur_effect == 'a') { // raiders
 			// move to event queue
 			if(p1.basics.cards[2] != empty_i) {
@@ -2024,7 +2048,6 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			if(pile.cards[i] == empty_i) return false;
 			pile.card_states[i] |= READY;
 		}
-		var resolving_placement = false;
 		if(card.id == punk_effect_i) {
 			if(pile != p1.board) return false;
 			if(is_camp(pile, i)) return false;
@@ -2125,12 +2148,13 @@ function on_drag_to_events(pile, i) {
 		place_on_events(dragging_pile, 0, pile);
 	}
 	if(is_resolving() && card.id >= effects_start_i) {
-		if(card.id == advance_effect_i) {
-			if(i - 1 >= 0 && pile.cards[i - 1] != empty_i) return false;
-			place_on_events(pile, i, pile, i - 1, true);
-		}
-		else return false;
-		continue_effect(pile, i);
+		if(card.id != advance_effect_i) return false; // only advance event can be used on events
+		if(i - 1 >= 0 && pile.cards[i - 1] != empty_i) return false; // can't advance into non-empty spot
+		place_on_events(pile, i, pile, i - 1, true);
+		dragging_pile.cards = [];
+		dragging_from = null;
+		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods))
+			continue_effect(pile, i); // continue effects we aren't continuing later
 		return false;
 	}
 	return false;
@@ -2190,7 +2214,7 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 			var was_dragging_from = dragging_from;
 			var was_first_effect = estack.length > 0 && estack[0].i == 0;
 			var source_card = get_effect_source_card();
-			var was_on_play_effect = source_card != null && source_card.abilities != null && estack[0].str == source_card.abilities[2];
+			var was_on_play_effect = source_card != null && source_card.abilities != null && source_card.abilities[2] != null && estack[0].str == source_card.abilities[2].effect;
 			var where_on_card = {x: mouse.x - card_x, y: mouse.y - card_y};
 			starting_turn = true; // defer sending gamestate to after we choose the sound
 			if(on_drag != null) on_drag(pile, j, where_on_card); // call on_drag if it exists
