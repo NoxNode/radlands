@@ -95,7 +95,7 @@
 - exit
 - You now have updated your radlands server
 
-## if the git fetch showed that server.js is updated, do this instead (existing games will be reset):
+## if server.js is updated, do this instead (existing games will be reset):
 - run the following command: ps aux | grep "node server"
 - copy the number on the 2nd-to-left-most column of the row that says node server.js
 - run the following commands:
