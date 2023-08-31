@@ -80,7 +80,7 @@
 - git clone "https://github.com/NoxNode/radlands.git"
 - cd radlands
 - npm install
-- node server.js &
+- node server.js > logs.txt 2>&1 &
 - exit
 - You now have a free google cloud server running radlands
 - copy the "External IP" for the VM you just created
@@ -96,14 +96,14 @@
 - You now have updated your radlands server
 
 ## if the git fetch showed that server.js is updated, do this instead (existing games will be reset):
-- run the following command: ps aux
-- look in the table for "node server.js" (copy the number on the 2nd-to-left-most column of that row)
+- run the following command: ps aux | grep "node server"
+- copy the number on the 2nd-to-left-most column of the row that says node server.js
 - run the following commands:
 - kill [that number you copied]
 - cd radlands (if you haven't already)
 - git fetch (if you haven't already)
 - git rebase (if you haven't already)
-- node server.js &
+- node server.js > logs.txt 2>&1 &
 - exit
 - You now have updated your radlands server
 
