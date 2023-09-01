@@ -1800,14 +1800,14 @@ function damage_card(pile, i, kill, injur, restore) {
 
 function use_ability(pile, i, where_on_card, must_be_ready) {
 	var card = cards[pile.cards[i]];
-	if(card == null) return;
+	if(card == null) return false;
 	var cost = 9999;
 	var effect = "";
 	if(is_person(pile, i) && is_trait_active("Argo Yesky") && where_on_card.y < card_height / 2) {
 		cost = 1;
 		effect = "d(2uc)";
 	}
-	if(cost == 9999 && (pile.card_states[i] & 3) == FLIPPED) return; // can't use ability of a flipped over card without argo
+	if(cost == 9999 && (pile.card_states[i] & 3) == FLIPPED) return false; // can't use ability of a flipped over card without argo
 	if(cost == 9999 && card.abilities != null && card.abilities.length > 0) {
 		var ability_i = 0;
 		if(card.abilities[1] != null && where_on_card.x > card_width / 2)
@@ -1818,7 +1818,7 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 	if(!can_resolve_effect(effect)) {
 		status_text = "Cannot use ability because condition not met";
 		PlaySound(sounds[sound_error_i], true);
-		return;
+		return false;
 	}
 	if(card.name == "Pilbox") { // reduce cost by destroyed camps
 		for(var j = 6; j < 9; j++)
@@ -1842,6 +1842,7 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 		p1.water -= cost;
 		resolve(effect, pile, i);
 	}
+	return true;
 }
 
 function can_resolve_effect(effect_str) {
@@ -2073,8 +2074,10 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 				play_sound_for_junk(cards[discard_pile.cards[0]].junk);
 				resolve(cards[discard_pile.cards[0]].junk);
 			}
-			else
-				use_ability(pile, i, where_on_card);
+			else {
+				var success = use_ability(pile, i, where_on_card);
+				if(!success) return false;
+			}
 			if(estack.length > 0 && is_continuing_later(estack[0].cur_effect, cur_mods)) {
 				dragging_pile.cards = [];
 				dragging_from = null;
