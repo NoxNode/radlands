@@ -1848,7 +1848,7 @@ function can_resolve_effect(effect_str) {
 	if(effect_str == null || effect_str.length == 0) return false;
 	if(effect_str[0] == 'i') // injur should just check for them having people by default
 		effect_str = "?(2p)::" + effect_str;
-	if(effect_str[0].startsWith("k(1p)")) // kill own person cards should check if you have a person by default
+	if(effect_str.startsWith("k(1p)")) // kill own person cards should check if you have a person by default
 		effect_str = "?(1p)::" + effect_str;
 	var cutoff_index = effect_str.indexOf("::");
 	if(effect_str[0] != '?' || cutoff_index == -1) return true;
