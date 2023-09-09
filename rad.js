@@ -1,8 +1,8 @@
 /*
 ------ gameplay bugs -----
 
-
------- visual bugs -----
+------ visual/audio bugs -----
+follow up sounds like catapult and pyromancer
 fix problem of non-turn player not being able to restore the same state until turn player does something
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
@@ -845,7 +845,8 @@ function ApplyGameState(game_state) {
 	event_resolved_this_turn       = game_state.event_resolved_this_turn;
 	event_played_this_turn         = game_state.event_played_this_turn;
 	ability_used_this_turn         = game_state.ability_used_this_turn;
-	high_ground_resolved_this_turn = game_state.high_ground_resolved_this_turn;
+	if(turn % 2 == my_id)
+		high_ground_resolved_this_turn = game_state.high_ground_resolved_this_turn;
 	people_placed_this_turn        = game_state.people_placed_this_turn;
 	// play prev_sound_played_i from other player
 	if(turn >= 0 && game_state.my_id != my_id && game_state.prev_sound_played_i != null && game_state.prev_sound_played_i != -1) {
@@ -1318,7 +1319,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 	if(is_logging) console.log(effect_str);
 	if(!continuing_effect) {
 		push_effect(effect_str, self_pile, self_i);
-		if(!can_resolve_effect(effect_str)) {
+		if(!can_resolve_effect(effect_str, self_pile, self_i)) {
 			status_text = "Effect fizzled because condition not met or no valid targets";
 			PlaySound(sounds[sound_error_i], true);
 			estack[0].i = estack[0].str.length;
@@ -1328,7 +1329,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			SendGameState();
 		}
 	}
-	if(self_pile != null && self_pile.cards[self_i] != empty_i && cards[self_pile.cards[self_i]].name == "High Ground" && effect_str[0] != '2')
+	if(self_pile != null && self_pile.cards[self_i] != empty_i && cards[self_pile.cards[self_i]].name == "High Ground" && turn % 2 == my_id)
 		high_ground_resolved_this_turn = true;
 	var skip_next = false;
 	var cur_effect = estack[0].cur_effect;
@@ -1815,7 +1816,7 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 		cost = card.abilities[ability_i].cost;
 		effect = card.abilities[ability_i].effect;
 	}
-	if(!can_resolve_effect(effect)) {
+	if(!can_resolve_effect(effect, pile, i)) {
 		status_text = "Cannot use ability because condition not met";
 		PlaySound(sounds[sound_error_i], true);
 		return false;
@@ -1845,7 +1846,7 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 	return true;
 }
 
-function can_resolve_effect(effect_str) {
+function can_resolve_effect(effect_str, pile, i) {
 	if(effect_str == null || effect_str.length == 0) return false;
 	if(effect_str[0] == 'i') // injur should just check for them having people by default
 		effect_str = "?(2p)::" + effect_str;
@@ -1856,7 +1857,7 @@ function can_resolve_effect(effect_str) {
 	// while there's an initial condition with a cutoff
 	while(effect_str[0] == '?' && cutoff_index != -1) {
 		// resolve just the initial condition with a skippable c and final c (success determined by which one we end at)
-		resolve(effect_str.substring(0, cutoff_index) + ":cc");
+		resolve(effect_str.substring(0, cutoff_index) + ":cc", pile, i);
 		// then record if it succeeded, splice it off, return failure or continue until no more conditions or success
 		var success = estack[0].i == cutoff_index + 1;
 		estack.splice(0, 1);
@@ -1928,6 +1929,7 @@ function is_resolving() {
 
 function on_click_basic(pile, i, where_on_card) {
 	if(pile.cards[i] == empty_i) return;
+	// TODO: prolly wanna play sounds here
 	if(i == 0 && p1.water >= 2) {
 		p1.water -= 2;
 		move_card(draw_pile, 0, p1.hand, 0);
@@ -1973,8 +1975,6 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		p1.water -= play_cost;
 		if(from != temp_pile) // don't count rearranging as placing
 			people_placed_this_turn += 1;
-		if(is_trait_active("Karli Blaze"))
-			pile.card_states[i] |= READY;
 		var prev_estack_len = estack.length;
 		// before-placement on play abilities (don't trigger when dragging from temp)
 		var resolved_on_play_already = false;
@@ -1984,6 +1984,8 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		}
 		// place on board (potentially get the replacement effect if played on full column)
 		place_on_board(dragging_pile, 0, pile, i);
+		if(is_trait_active("Karli Blaze"))
+			pile.card_states[i] |= READY;
 		// after-placement on play abilities (don't trigger when dragging from temp)
 		if(!resolved_on_play_already && card.abilities.length == 3 && from != temp_pile) {
 			resolve(card.abilities[2].effect, pile, i);
@@ -2036,6 +2038,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			if(pile != p1.board) return false;
 			if(pile.cards[i] == empty_i) return false;
 			pile.card_states[i] = UNHARMED;
+			if(is_camp(pile, i)) pile.card_states[i] |= READY;
 			if(pile.cards[i] >= people_start_i && pile.cards[i] < events_start_i) {
 				people_placed_this_turn += 1;
 				var card = cards[pile.cards[i]];
