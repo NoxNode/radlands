@@ -919,7 +919,16 @@ function ApplyGameState(game_state) {
 	prev_game_state = game_state;
 }
 
+var turn_time_left = 120;
+var timer_interval = null;
+function timer() {
+	turn_time_left -= 1;
+	if(turn_time_left == 0)
+		end_turn();
+}
+
 function start_turn() {
+	timer_interval = setInterval(timer, 1000);
 	PlaySound(sounds[sound_bell_i], true);
 	starting_turn = true;
 	if(turn == 0) {
@@ -974,6 +983,9 @@ function start_turn() {
 }
 
 function end_turn() {
+	if(turn >= 0 && turn % 2 != my_id) return;
+	if(timer_interval != null)
+		clearInterval(timer_interval);
 	// auto-use unspent water
 	while(p1.water >= 2) on_click_basic(p1.basics, 0);
 	if(p1.water == 1) on_click_basic(p1.basics, 1);
@@ -1266,7 +1278,7 @@ function Update() {
 		}
 	}
 	//status_text = innerWidth + ", " + innerHeight + " - " + mouse.x + ", " + mouse.y + " - " + outerHeight + ", " + screen.height + ", " + window.devicePixelRatio;
-	DrawText(status_text, mat_endx + 10, 40 * 3, 24, "white");
+	DrawText(turn_time_left + " " + status_text, mat_endx + 10, 40 * 3, 24, "white");
 
 	// render dragged card above everything
 	render_pile(dragging_pile, mouse.x - card_width/2, mouse.y - card_height/2);
