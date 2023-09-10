@@ -11,8 +11,6 @@ rotated cards should change "where_on_card" to take the rotation into account
 draft pick camps (draw 6 each, pick 1 then pass hand to opponent, repeat x2)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
 	could add a &draft=[true/false] to the url
-timed turns
-	could add a &timer=[seconds] to the url
 experimental rules
 	could add a &experimental=[true/false] to the url
 	if true, use new card defs and assets
@@ -109,6 +107,7 @@ general funcs
 	SaveGame
 	SendGameState
 	ApplyGameState
+	timer
 	start_turn
 	end_turn
 	done_with_optionals
@@ -729,6 +728,7 @@ function Init() {
 	var url = window.location.href;
 	applySeed(url.substring(0, url.length-1));
 	my_id = Number(url[url.length-1]);
+	timer_enabled = url.includes("/?timed");
 	socket.emit("con", url);
 	// create global piles
 	draw_pile     = new_pile();
@@ -819,6 +819,7 @@ function SendGameState(end_of_turn, response) {
 		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
 		people_placed_this_turn:        people_placed_this_turn,
 		prev_sound_played_i:            prev_sound_played_i,
+		turn_time_left:                 turn_time_left,
 		//version: 1,
 	};
 	socket.emit("state", JSON.stringify(game_state));
@@ -894,9 +895,11 @@ function ApplyGameState(game_state) {
 		temp_pile.cards = [];
 	}
 	// if recent game state send was the end of a turn and its now our turn start it
-	if(game_state.end_of_turn && turn % 2 == my_id) {
+	if(game_state.end_of_turn && turn % 2 == my_id)
 		start_turn();
-	}
+	// view their timer when not our turn
+	if(turn % 2 != my_id)
+		turn_time_left = game_state.turn_time_left;
 	if(game_state.my_id != my_id && game_state.estack.length > 0 && game_state.estack[0].to_send) {
 		// if we're receiving the response to something we sent, be done with it and continue if need be
 		if(game_state.response) {
@@ -919,16 +922,24 @@ function ApplyGameState(game_state) {
 	prev_game_state = game_state;
 }
 
-var turn_time_left = 120;
-var timer_interval = null;
+var turn_time_left = "";
+var timer_interval = setInterval(timer, 1000);
+var timer_enabled = false;
 function timer() {
+	if(turn_time_left == "") return;
+	if(!timer_enabled) return;
+	if(turn < 0) return;
+	if(estack.length > 0 && estack[0].str == "g") return; // stop timer when game is over
+	if(estack.length > 0 && estack[0].to_send) return; // don't count when waiting on opponent
+	if(estack.length > 1 && estack[1].to_send) return; // don't count when doing a sent effect
 	turn_time_left -= 1;
 	if(turn_time_left == 0)
 		end_turn();
 }
 
 function start_turn() {
-	timer_interval = setInterval(timer, 1000);
+	if(timer_enabled)
+		turn_time_left = 120;
 	PlaySound(sounds[sound_bell_i], true);
 	starting_turn = true;
 	if(turn == 0) {
@@ -984,8 +995,6 @@ function start_turn() {
 
 function end_turn() {
 	if(turn >= 0 && turn % 2 != my_id) return;
-	if(timer_interval != null)
-		clearInterval(timer_interval);
 	// auto-use unspent water
 	while(p1.water >= 2) on_click_basic(p1.basics, 0);
 	if(p1.water == 1) on_click_basic(p1.basics, 1);
@@ -1264,7 +1273,7 @@ function Update() {
 		if(estack.length == 0) {
 			push_effect("g");
 			if(mouse.buttonsPressed.length == 0) return; // if user hasn't interacted with the page, don't re-send the end game state
-				SendGameState(true);
+			SendGameState(true);
 			// play win sound after current sound or now if no sound playing
 			if(prev_sound != null && !prev_sound.paused) {
 				prev_sound.onended = function() {

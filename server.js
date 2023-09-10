@@ -24,7 +24,7 @@ var lobbies = {};
 var sock_to_seed = {};
 // matchmaking lobbies
 var waiting_for_match = null;
-var matches = 8;
+var matches = 30;
 // timing stuff to free up memory when server is idle for a long time
 function secs_since_epoch() {
 	return Math.floor(Date.now() / 1000);
@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
 
 		if(url == null || url.length < 5) return;
 		// handle matchmaking
-		if(url.endsWith("/?match")) {
+		if(url.endsWith("/?match") || url.endsWith("/?timed")) {
 			if(waiting_for_match == null) {
 				waiting_for_match = socket;
 				socket.emit("chat", "waiting for opponent...");

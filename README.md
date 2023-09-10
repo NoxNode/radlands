@@ -6,12 +6,14 @@
 - buy the official, physical card game: <https://roxley.com/products/radlands>
 - rulebook pdf: <https://cdn.shopify.com/s/files/1/0246/2190/8043/files/Radlands_-_Rulebook_v1.2_-_2023-05-26.pdf?v=1685137340>
 - google cloud server (match-making): <http://34.83.89.6:8080/?match>
+- google cloud server (2 minute timed match-making): <http://34.83.89.6:8080/?timed>
 - google cloud server (custom lobby): <http://34.83.89.6:8080/?test0>
 
 ## notes
 - custom lobbies: the last digit of the above url is the player id (0 for first, 1 for second - can spectate by using 2-9)
 - custom lobbies: the stuff between the '?' and the last digit is the lobby id (and random seed)
 - match-making: go to the /?match url and it'll put you in a custom lobby with the next person to go to that url
+- custom lobbies with /?timed in the url will have a 2 minute timer on each turn
 - choosing camps is treated as a turn (turn -2 and -1)
 - if there's a problem, try "Restart Turn", refresh the page, or go to a different lobby id
 
