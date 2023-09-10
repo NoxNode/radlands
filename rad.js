@@ -1799,7 +1799,7 @@ function damage_card(pile, i, kill, injur, restore) {
 	return true;
 }
 
-function use_ability(pile, i, where_on_card, must_be_ready) {
+function use_ability(pile, i, where_on_card, must_be_ready, redirect_self) {
 	var card = cards[pile.cards[i]];
 	if(card == null) return false;
 	var cost = 9999;
@@ -1841,7 +1841,10 @@ function use_ability(pile, i, where_on_card, must_be_ready) {
 			pile.card_states[i] |= READY;
 		ability_used_this_turn = true;
 		p1.water -= cost;
-		resolve(effect, pile, i);
+		if(redirect_self && estack.length > 0 && estack[0].self_pile != null)
+			resolve(effect, estack[0].self_pile, estack[0].self_i);
+		else
+			resolve(effect, pile, i);
 	}
 	return true;
 }
@@ -2078,7 +2081,11 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 				resolve(cards[discard_pile.cards[0]].junk);
 			}
 			else {
-				var success = use_ability(pile, i, where_on_card);
+				var success = false;
+				if(cur_mods.includes('y')) // for mimic, redirect (s) mod effects to the mimic (mimic on mutant)
+					success = use_ability(pile, i, where_on_card, false, true);
+				else
+					success = use_ability(pile, i, where_on_card);
 				if(!success) return false;
 			}
 			if(estack.length > 0 && is_continuing_later(estack[0].cur_effect, cur_mods)) {
