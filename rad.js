@@ -1,14 +1,22 @@
 /*
 ------ gameplay bugs -----
+high ground doesn't let you put down punks (maybe if they're events?)
+restart turn shouldn't reset the timer
+stop timer when resolving (at least when 0 time is left)
+scavenger camp shouldn't let you heal when you omen clock their raiders
 
 ------ visual/audio bugs -----
+if NaN(my_id) don't render hands
+shouldn't be able to scroll such that nothing is visible
 follow up sounds like catapult and pyromancer
 fix problem of non-turn player not being able to restore the same state until turn player does something
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
 
 ----- features TODO -----
-draft pick camps (draw 6 each, pick 1 then pass hand to opponent, repeat x2)
+in timed mode, high ground should probably add 30 seconds to the clock
+timer on camp selection?
+draft pick camps (draw 7 each, each player bans 1 of the other person's camps)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
 	could add a &draft=[true/false] to the url
 experimental rules
