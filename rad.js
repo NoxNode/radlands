@@ -1,11 +1,18 @@
 /*
 ------ gameplay bugs -----
-high ground doesn't let you put down punks (maybe if they're events?)
-restart turn shouldn't reset the timer
-stop timer when resolving (at least when 0 time is left)
-scavenger camp shouldn't let you heal when you omen clock their raiders
+omen clock on raiders or famine
+	in order to fix omen clock on stuff that requires them to send stuff back to us
+	I need to refactor how the effect sending stuff works
+	the plan:
+	effects on estack say which player started the effect
+	if the top effect was started by a different player and starts with a 2
+		then resolve the effect with that 2 substring'd out
+		that way if p0 sends a 22d(1m), p1 gets it and resolves 2(d1m), which then p0 will resolve d(1m)
+		then maybe we have a resolved flag on effects that we set to true before we resolve the 2 prefix thing
+		then once we finish the non-2 prefixed thing we'll pop the resolved 2 prefix stuff then continue on
 
 ------ visual/audio bugs -----
+strafe not making sound
 if NaN(my_id) don't render hands
 shouldn't be able to scroll such that nothing is visible
 follow up sounds like catapult and pyromancer
@@ -14,7 +21,8 @@ rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
 
 ----- features TODO -----
-in timed mode, high ground should probably add 30 seconds to the clock
+restart turn maybe shouldn't reset the timer
+in timed mode, high ground should maybe add 30 seconds to the clock
 timer on camp selection?
 draft pick camps (draw 7 each, each player bans 1 of the other person's camps)
 	or just reveal all at the start in temp and drag from temp to board, auto-ends turn
@@ -675,16 +683,18 @@ var p1                  = {water: 0}; // player 1
 var p2                  = {water: 0}; // player 2
 var estack              = []; // effect stack
 var packet_sequence_num = 0;
-var prev_game_state = null;
+var prev_game_state     = null;
 
-// this_turn trackers
-var raiders_resolved_this_turn     = false;
-var event_resolved_this_turn       = false;
-var event_played_this_turn         = false;
-var ability_used_this_turn         = false;
-var high_ground_resolved_this_turn = false;
-var people_placed_this_turn        = 0;
-var prev_sound_played_i = -1;
+// this_turn trackers                             currently applies to:
+var event_resolved_this_turn          = false; // watchtower
+var event_played_this_turn            = false; // zeto
+var ability_used_this_turn            = false; // vera
+var p0_raiders_resolved_this_turn     = false; // scavenger camp
+var p0_high_ground_resolved_this_turn = false; // high ground
+var p1_raiders_resolved_this_turn     = false; // scavenger camp
+var p1_high_ground_resolved_this_turn = false; // high ground
+var people_placed_this_turn           = 0;     // transplant lab, nest of spies
+var prev_sound_played_i               = -1;
 
 // ui vars
 var dragging_pile = null;
@@ -692,12 +702,12 @@ var dragging_from = null;
 var starting_turn = false;
 var status_text   = "";
 var is_logging    = false;
-var oc = null;
-var octx = null;
-var oc_scale = 3;
-var sounds = [];
-var prev_sound = null;
-var game_over = false;
+var oc            = null;
+var octx          = null;
+var oc_scale      = 3;
+var sounds        = [];
+var prev_sound    = null;
+var game_over     = false;
 
 function Init() {
 	// connect to server and set up listeners
@@ -811,23 +821,25 @@ function SendGameState(end_of_turn, response) {
 		p2.basics.cards, p2.board.cards, p2.events.cards, p2.hand.cards];
 	var pile_card_states = [p1.board.card_states, p2.board.card_states];
 	var game_state = {
-		packet_sequence_num:            packet_sequence_num,
-		my_id:                          my_id,
-		water:                          p1.water,
-		turn:                           turn,
-		pile_cards:                     pile_cards,
-		pile_card_states:               pile_card_states,
-		end_of_turn:                    end_of_turn,
-		estack:                         estack,
-		response:                       response,
-		raiders_resolved_this_turn:     raiders_resolved_this_turn,
-		event_resolved_this_turn:       event_resolved_this_turn,
-		event_played_this_turn:         event_played_this_turn,
-		ability_used_this_turn:         ability_used_this_turn,
-		high_ground_resolved_this_turn: high_ground_resolved_this_turn,
-		people_placed_this_turn:        people_placed_this_turn,
-		prev_sound_played_i:            prev_sound_played_i,
-		turn_time_left:                 turn_time_left,
+		packet_sequence_num:               packet_sequence_num,
+		my_id:                             my_id,
+		water:                             p1.water,
+		turn:                              turn,
+		pile_cards:                        pile_cards,
+		pile_card_states:                  pile_card_states,
+		end_of_turn:                       end_of_turn,
+		estack:                            estack,
+		response:                          response,
+		event_resolved_this_turn:          event_resolved_this_turn,
+		event_played_this_turn:            event_played_this_turn,
+		ability_used_this_turn:            ability_used_this_turn,
+		p0_raiders_resolved_this_turn:     p0_raiders_resolved_this_turn,
+		p0_high_ground_resolved_this_turn: p0_high_ground_resolved_this_turn,
+		p1_raiders_resolved_this_turn:     p1_raiders_resolved_this_turn,
+		p1_high_ground_resolved_this_turn: p1_high_ground_resolved_this_turn,
+		people_placed_this_turn:           people_placed_this_turn,
+		prev_sound_played_i:               prev_sound_played_i,
+		turn_time_left:                    turn_time_left,
 		//version: 1,
 	};
 	socket.emit("state", JSON.stringify(game_state));
@@ -850,13 +862,14 @@ function ApplyGameState(game_state) {
 	else
 		p2.water = game_state.water;
 	turn = game_state.turn;
-	raiders_resolved_this_turn     = game_state.raiders_resolved_this_turn;
-	event_resolved_this_turn       = game_state.event_resolved_this_turn;
-	event_played_this_turn         = game_state.event_played_this_turn;
-	ability_used_this_turn         = game_state.ability_used_this_turn;
-	if(turn % 2 == my_id)
-		high_ground_resolved_this_turn = game_state.high_ground_resolved_this_turn;
-	people_placed_this_turn        = game_state.people_placed_this_turn;
+	event_resolved_this_turn          = game_state.event_resolved_this_turn;
+	event_played_this_turn            = game_state.event_played_this_turn;
+	ability_used_this_turn            = game_state.ability_used_this_turn;
+	p0_raiders_resolved_this_turn     = game_state.p0_raiders_resolved_this_turn;
+	p0_high_ground_resolved_this_turn = game_state.p0_high_ground_resolved_this_turn;
+	p1_raiders_resolved_this_turn     = game_state.p1_raiders_resolved_this_turn;
+	p1_high_ground_resolved_this_turn = game_state.p1_high_ground_resolved_this_turn;
+	people_placed_this_turn           = game_state.people_placed_this_turn;
 	// play prev_sound_played_i from other player
 	if(turn >= 0 && game_state.my_id != my_id && game_state.prev_sound_played_i != null && game_state.prev_sound_played_i != -1) {
 		PlaySound(sounds[game_state.prev_sound_played_i]);
@@ -934,15 +947,18 @@ var turn_time_left = "";
 var timer_interval = setInterval(timer, 1000);
 var timer_enabled = false;
 function timer() {
-	if(turn_time_left == "") return;
+	if(turn_time_left === "") return;
 	if(!timer_enabled) return;
 	if(turn < 0) return;
 	if(estack.length > 0 && estack[0].str == "g") return; // stop timer when game is over
 	if(estack.length > 0 && estack[0].to_send) return; // don't count when waiting on opponent
 	if(estack.length > 1 && estack[1].to_send) return; // don't count when doing a sent effect
 	turn_time_left -= 1;
-	if(turn_time_left == 0)
-		end_turn();
+	if(turn_time_left <= 0) {
+		turn_time_left = 0;
+		if(estack.length == 0) // don't end turn until the final effect is resolved
+			end_turn();
+	}
 }
 
 function start_turn() {
@@ -963,11 +979,13 @@ function start_turn() {
 			}
 		}
 	}
-	raiders_resolved_this_turn = false;
 	event_resolved_this_turn = false;
 	event_played_this_turn = false;
 	ability_used_this_turn = false;
-	high_ground_resolved_this_turn = false;
+	p0_raiders_resolved_this_turn = false;
+	p0_high_ground_resolved_this_turn = false;
+	p1_raiders_resolved_this_turn = false;
+	p1_high_ground_resolved_this_turn = false;
 	people_placed_this_turn = 0;
 	prev_sound_played_i = -1;
 	// ready camps and unharmed people
@@ -1358,8 +1376,6 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			SendGameState();
 		}
 	}
-	if(self_pile != null && self_pile.cards[self_i] != empty_i && cards[self_pile.cards[self_i]].name == "High Ground" && turn % 2 == my_id)
-		high_ground_resolved_this_turn = true;
 	var skip_next = false;
 	var cur_effect = estack[0].cur_effect;
 	var cur_mods = "";
@@ -1580,8 +1596,10 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		if(cur_effect == '?') {
 			if(cur_mods == "vr")
 				estack[0].success = event_resolved_this_turn;
-			if(cur_mods == "r")
-				estack[0].success = raiders_resolved_this_turn;
+			if(cur_mods == "r" && my_id == 0)
+				estack[0].success = p0_raiders_resolved_this_turn;
+			if(cur_mods == "r" && my_id == 1)
+				estack[0].success = p1_raiders_resolved_this_turn;
 			if(cur_mods.startsWith("c")) {
 				var num_cards = Number(cur_mods[1]);
 				estack[0].success = p1.hand.cards.length >= num_cards;
@@ -1738,15 +1756,24 @@ function place_on_events(from, from_i, to, to_i, override_correct) {
 	var correct_spot = card.delay - 1;
 	if(override_correct) correct_spot = to_i;
 	if(is_trait_active("Zeto Khan") && !event_played_this_turn) correct_spot = -1;
-	// resolve right away if 0 delay event
+	// resolve right away if 0 delay event (or moving up past slot 0)
 	if(correct_spot == -1) {
 		event_resolved_this_turn = true;
 		if(from != p1.events && from != p2.events)
 			event_played_this_turn = true;
 		var new_to = discard_pile;
 		var new_to_i = 0;
+		if(card.name == "High Ground") {
+			if     ((to == p1.events && my_id == 0) || (to == p2.events && my_id == 1))
+				p0_high_ground_resolved_this_turn = true;
+			else if((to == p1.events && my_id == 1) || (to == p2.events && my_id == 0))
+				p1_high_ground_resolved_this_turn = true;
+		}
 		if(card.name == "Raiders") {
-			raiders_resolved_this_turn = true;
+			if     ((to == p1.events && my_id == 0) || (to == p2.events && my_id == 1))
+				p0_raiders_resolved_this_turn = true;
+			else if((to == p1.events && my_id == 1) || (to == p2.events && my_id == 0))
+				p1_raiders_resolved_this_turn = true;
 			new_to = to == p2.events ? p2.basics : p1.basics; // if for some reason you advance their raiders
 			new_to_i = 2;
 			PlaySound(sounds[sound_crash_i]);
@@ -1930,7 +1957,7 @@ function is_person(pile, i) {
 }
 
 function is_protected(pile, i) {
-	if(high_ground_resolved_this_turn && pile == p2.board)
+	if((p0_high_ground_resolved_this_turn && my_id == 0) || (p1_high_ground_resolved_this_turn && my_id == 1))// && pile == p2.board)
 		return false;
 	// is there a card in this column more far up than us
 	var col = i % 3;
