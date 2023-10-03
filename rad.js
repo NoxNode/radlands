@@ -12,13 +12,12 @@ omen clock on raiders or famine
 		then once we finish the non-2 prefixed thing we'll pop the resolved 2 prefix stuff then continue on
 
 ------ visual/audio bugs -----
-strafe not making sound
-if NaN(my_id) don't render hands
 shouldn't be able to scroll such that nothing is visible
+strafe not making sound
 follow up sounds like catapult and pyromancer
-fix problem of non-turn player not being able to restore the same state until turn player does something
 rotated cards should create more space and have wider, more accurate hitbox
 rotated cards should change "where_on_card" to take the rotation into account
+fix problem of non-turn player not being able to restore the same state until turn player does something
 
 ----- features TODO -----
 restart turn maybe shouldn't reset the timer
@@ -1120,7 +1119,7 @@ function Update() {
 		scroll_pile(temp_pile, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
 		drag_from_pile(temp_pile, mat_endx, temp_yoff, draggable_end_i);
 	}
-	else {
+	else if(!isNaN(my_id)) {
 		DrawRect(mat_endx, temp_yoff, canvas.width - mat_endx, card_height, "grey");
 		DrawText("Player 0 Hand:", mat_endx, temp_yoff - 12, 24, "white");
 		render_pile(p2.hand, mat_endx, temp_yoff);
@@ -1138,7 +1137,8 @@ function Update() {
 		DrawText("Hand:", mat_endx, canvas.height - card_height - 12, 24, "white");
 	else
 		DrawText("Player 1 Hand:", mat_endx, canvas.height - card_height - 12, 24, "white");
-	render_pile(p1.hand, mat_endx, canvas.height - card_height);
+	if(!isNaN(my_id))
+		render_pile(p1.hand, mat_endx, canvas.height - card_height);
 	scroll_pile(p1.hand, mat_endx, canvas.height - card_height, canvas.width, canvas.height);
 	if((!is_resolving() || estack[0].cur_effect == 'c' || estack[0].cur_effect == 'j'))
 		drag_from_pile(p1.hand, mat_endx, canvas.height - card_height);
