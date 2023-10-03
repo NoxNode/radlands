@@ -2037,7 +2037,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		var prev_estack_len = estack.length;
 		// before-placement on play abilities (don't trigger when dragging from temp)
 		var resolved_on_play_already = false;
-		if(card.abilities.length == 3 && from != temp_pile && !card.abilities[2].effect.includes('s')) {
+		if(from != temp_pile && card.abilities.length == 3 && !card.abilities[2].effect.includes('s')) {
 			resolve(card.abilities[2].effect, pile, i);
 			resolved_on_play_already = true;
 		}
@@ -2046,7 +2046,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		if(is_trait_active("Karli Blaze"))
 			pile.card_states[i] |= READY;
 		// after-placement on play abilities (don't trigger when dragging from temp)
-		if(!resolved_on_play_already && card.abilities.length == 3 && from != temp_pile) {
+		if(!resolved_on_play_already && from != temp_pile && card.abilities.length == 3) {
 			resolve(card.abilities[2].effect, pile, i);
 		}
 		if(is_continuing_later(cur_effect, cur_mods) && estack[0].str[estack[0].i - 1] == '*' && estack[0].str.indexOf('*') != estack[0].i - 1) {
