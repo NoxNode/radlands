@@ -1,15 +1,6 @@
 /*
 ------ gameplay bugs -----
-omen clock on raiders or famine
-	in order to fix omen clock on stuff that requires them to send stuff back to us
-	I need to refactor how the effect sending stuff works
-	the plan:
-	effects on estack say which player started the effect
-	if the top effect was started by a different player and starts with a 2
-		then resolve the effect with that 2 substring'd out
-		that way if p0 sends a 22d(1m), p1 gets it and resolves 2(d1m), which then p0 will resolve d(1m)
-		then maybe we have a resolved flag on effects that we set to true before we resolve the 2 prefix thing
-		then once we finish the non-2 prefixed thing we'll pop the resolved 2 prefix stuff then continue on
+
 
 ------ visual/audio bugs -----
 shouldn't be able to scroll such that nothing is visible
@@ -51,6 +42,10 @@ make server just use the regular port 80
 	shortens url and steps to create google cloud server
 to clean up the replacement on full column effect, can make a mod that doesn't change the target
 	then just treat c(3fi) as another on_drag_to_board to target thing
+to clean up the omen clock on raiders or famine stuff
+	should really say which player started an effect
+	then when we send an effect, we know if the other person sent it or we did
+	and we can just resolve the stuff sent to us that we know is from the other person
 
 ------ potential balance changes -----
 restoring enemy cards should be an option just like advancing their event is an option
@@ -844,6 +839,9 @@ function SendGameState(end_of_turn, response) {
 	socket.emit("state", JSON.stringify(game_state));
 	prev_sound_played_i = -1;
 	prev_game_state = game_state;
+	if(is_logging) console.log("sending: ");
+	if(is_logging) console.log(JSON.parse(JSON.stringify(game_state)));
+	if(is_logging) console.trace();
 	return game_state;
 }
 
@@ -908,11 +906,13 @@ function ApplyGameState(game_state) {
 	if(game_state.end_of_turn) {
 		estack = [];
 		temp_pile.cards = [];
+		temp_pile.card_states = [];
 	}
 	// if we're receiving a state update when not our turn that isn't prompting us to do something, clear the stack
 	if(game_state.my_id != my_id && turn % 2 != my_id && estack.length > 0 && !estack[0].to_send) {
 		estack = [];
 		temp_pile.cards = [];
+		temp_pile.card_states = [];
 	}
 	// if recent game state send was the end of a turn and its now our turn start it
 	if(game_state.end_of_turn && turn % 2 == my_id)
@@ -929,6 +929,7 @@ function ApplyGameState(game_state) {
 		}
 		else { // if they sent effects for us to do, resolve them
 			temp_pile.cards = [];
+			temp_pile.card_states = [];
 			PlaySound(sounds[sound_bell_i], true);
 			resolve(game_state.estack[0].to_send, null, null, false, false, true);
 		}
@@ -937,6 +938,7 @@ function ApplyGameState(game_state) {
 	if(game_state.response && game_state.my_id == my_id) {
 		estack = [];
 		temp_pile.cards = [];
+		temp_pile.card_states = [];
 	}
 	prev_sound_played_i = -1;
 	prev_game_state = game_state;
@@ -1055,6 +1057,7 @@ function end_turn() {
 
 function done_with_optionals() {
 	temp_pile.cards = [];
+	temp_pile.card_states = [];
 	var prev_effect = estack[0].str[estack[0].i - 1];
 	if(prev_effect == '*') {
 		estack[0].resolving_any_num = false;
@@ -1471,8 +1474,10 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		if(cur_effect == '2') { // send effects for other player to resolve
 			estack[0].i = effect_str.length;
 			estack[0].to_send = effect_str.substring(i, effect_str.length);
-			if(is_logging) console.log("sending effect for other to do " + effect_str);
-			SendGameState();
+			sent_effect = true;
+			if(is_logging) console.log("sending effect for other to do " + estack[0].to_send);
+			if(!starting_turn)
+				SendGameState();
 			break;
 		}
 		if(cur_effect == 'w') { // water
@@ -1531,6 +1536,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 		if(temp_pile.cards.length > 0 && temp_pile.cards[0] >= effects_start_i && (cur_effect != 'b' || cur_mods.includes('3')) &&
 		(cur_mods.includes('a') || cur_mods.includes('s') || cur_mods.includes('i') || cur_mods.includes('3') || cur_mods.includes('5'))) {
 			var effect_card_i = temp_pile.cards.splice(0, 1)[0];
+			temp_pile.card_states.splice(0,1); // also remove the card state to stay in sync
 			dragging_pile.cards[0] = effect_card_i;
 			dragging_from = temp_pile;
 			if(cur_mods.includes('a')) {
@@ -1657,8 +1663,8 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 				estack[0].success = people_placed_this_turn >= 2;
 			if(cur_mods == "sy")
 				estack[0].success = (self_pile.card_states[self_i] & 3) == UNHARMED;
-			if(cur_mods == "im")
-				estack[0].success = target_card.id >= camps_start_i && target_card.id < people_start_i;
+			if(cur_mods == "im") // if killing a person, target_card will be null for Looter (cuz damage_card moved the target)
+				estack[0].success = target_card != null && target_card.id >= camps_start_i && target_card.id < people_start_i;
 			if(cur_mods == "iv")
 				estack[0].success = target_card.id >= events_start_i && target_card.id < effects_start_i;
 			if(cur_mods == "ip")
@@ -1686,7 +1692,17 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 				SendGameState(false, true);
 			estack = [];
 			temp_pile.cards = [];
+			temp_pile.card_states = [];
 			return;
+		}
+		else if(turn % 2 == my_id && estack.length > 0 && estack[0].str[0] == '2') {
+			// we just resolved a sent effect as the turn player, so we must've omen clocked their event
+			// so remove all the effect sending stuff on the stack and continue if need be
+			while(estack.length > 0 && estack[0].str[0] == '2') {
+				estack.splice(0, 1);
+			}
+			if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods))
+				continue_effect(estack[0].prev_target_pile, estack[0].prev_target_i);
 		}
 		if(estack.length > 0 && !is_continuing_later(estack[0].cur_effect, estack[0].mods)) { // continue down the stack if not empty yet
 			continue_effect(self_pile, self_i);
@@ -1704,7 +1720,7 @@ function is_continuing_later(cur_effect, cur_mods) {
 	if(estack[0].to_send != null) return true;
 	if(estack[0].i >= estack[0].str.length) return false;
 	if(estack[0].success) return false;
-	return temp_pile.cards.length > 0
+	return (estack[0].my_num_in_temp > 0 && temp_pile.cards.length > 0)
 		|| (cur_effect == 'j' && !cur_mods.includes('i'))
 		|| (cur_effect == 'c' && !cur_mods.includes('i'));
 }
@@ -2297,8 +2313,14 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 				PlaySound(sounds[dragging_card.on_play_sound]);
 			else
 				PlaySound(sounds[sound_place_card_i]);
-			if(turn % 2 != my_id) // if finishing a sent effect
-				SendGameState(false, true);
+			if(turn % 2 != my_id) { // if finishing a sent effect
+				if(sent_effect) { // if we're sending an effect in response to a sent effect (omen clock)
+					sent_effect = false;
+					SendGameState(); // send it as a regular thing, not a response
+				}
+				else
+					SendGameState(false, true);
+			}
 			else
 				SendGameState();
 		}
