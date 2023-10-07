@@ -678,6 +678,7 @@ var p2                  = {water: 0}; // player 2
 var estack              = []; // effect stack
 var packet_sequence_num = 0;
 var prev_game_state     = null;
+var sent_effect         = false;
 
 // this_turn trackers                             currently applies to:
 var event_resolved_this_turn          = false; // watchtower
