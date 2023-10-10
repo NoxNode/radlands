@@ -1689,9 +1689,10 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 	if(!is_continuing_later(cur_effect, cur_mods) && !repeating_effect && i >= effect_str.length) {
 		estack.splice(0, 1);
 		if(turn % 2 != my_id) { // if finishing a sent effect
-			if(!starting_turn)
+			if(!starting_turn) {
 				SendGameState(false, true);
-			estack = [];
+				estack = [];
+			}
 			temp_pile.cards = [];
 			temp_pile.card_states = [];
 			return;
@@ -2319,8 +2320,10 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 					sent_effect = false;
 					SendGameState(); // send it as a regular thing, not a response
 				}
-				else
+				else {
 					SendGameState(false, true);
+					estack = [];
+				}
 			}
 			else
 				SendGameState();
