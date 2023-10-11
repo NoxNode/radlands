@@ -1,6 +1,6 @@
 /*
 ------ gameplay bugs -----
-
+holding card should be cleared on apply
 
 ------ visual/audio bugs -----
 shouldn't be able to scroll such that nothing is visible
@@ -843,6 +843,7 @@ function SendGameState(end_of_turn, response) {
 	if(is_logging) console.log("sending: ");
 	if(is_logging) console.log(JSON.parse(JSON.stringify(game_state)));
 	if(is_logging) console.trace();
+	sent_effect = false;
 	return game_state;
 }
 
@@ -943,6 +944,7 @@ function ApplyGameState(game_state) {
 	}
 	prev_sound_played_i = -1;
 	prev_game_state = game_state;
+	sent_effect = false;
 }
 
 var turn_time_left = "";
