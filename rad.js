@@ -1,6 +1,6 @@
 /*
 ------ gameplay bugs -----
-holding card should be cleared on apply
+
 
 ------ visual/audio bugs -----
 shouldn't be able to scroll such that nothing is visible
@@ -694,6 +694,7 @@ var prev_sound_played_i               = -1;
 // ui vars
 var dragging_pile = null;
 var dragging_from = null;
+var dragging_from_i = 0;
 var starting_turn = false;
 var status_text   = "";
 var is_logging    = false;
@@ -851,6 +852,10 @@ function ApplyGameState(game_state) {
 	// adapt old game_states to new
 	//if(game_state.version == null) {
 	//}
+	if(dragging_pile.cards.length > 0) {
+		move_card(dragging_pile, 0, dragging_from, 0);
+		dragging_from = null;
+	}
 	status_text = "";
 	if(is_logging) console.log("applying: ");
 	if(is_logging) console.log(game_state);
@@ -1542,6 +1547,7 @@ function resolve(effect_str, self_pile, self_i, continuing_effect, repeating_eff
 			temp_pile.card_states.splice(0,1); // also remove the card state to stay in sync
 			dragging_pile.cards[0] = effect_card_i;
 			dragging_from = temp_pile;
+			dragging_from_i = 0;
 			if(cur_mods.includes('a')) {
 				var num_applied_to = 0;
 				for(var j = 8; j >= 0; j--) {
@@ -2270,6 +2276,7 @@ function drag_from_pile(pile, pileX, pileY, draggable_end_i) {
 				PlaySound(sounds[sound_pickup_card_i], true);
 			move_card(pile, i, dragging_pile, 0);
 			dragging_from = pile;
+			dragging_from_i = i;
 		}
 	}
 }
