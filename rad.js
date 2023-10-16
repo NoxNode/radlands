@@ -702,7 +702,7 @@ var prev_sound_played_i               = -1;
 var dragging_pile = null;
 var dragging_from = null;
 var dragging_from_i = 0;
-var starting_turn = false;
+var starting_turn = true;
 var status_text   = "";
 var is_logging    = false;
 var oc            = null;
@@ -774,6 +774,7 @@ function Init() {
 	}
 	// do experimental changes
 	if(experimental_on) {
+		turn = -4; // discard enemy camp turns
 		// allow restoring enemies and damaging own cards
 		for(var i = 0; i < cards.length; i++) {
 			var card = cards[i];
@@ -820,7 +821,7 @@ function Init() {
 	for(var i = people_start_i; i < effects_start_i; i++) {
 		var card = cards[i];
 		draw_pile.cards.push(card.id);
-		if(i >= events_start_i || card.play_cost < 3) // if event or non-unique person, add another copy
+		if(i >= events_start_i || i <= 58) // if event or non-unique person, add another copy
 			draw_pile.cards.push(card.id);
 	}
 	shuffle(draw_pile.cards);
@@ -849,6 +850,7 @@ function Init() {
 	p2.basics.cards[0] = aid_i;
 	p2.basics.cards[1] = water_i;
 	p2.basics.cards[2] = raiders_i;
+	starting_turn = false;
 }
 
 function chat(chat_msg) {
@@ -955,7 +957,7 @@ function ApplyGameState(game_state) {
 	p1.basics.cards[0] = punk_i;
 	p2.basics.cards[0] = aid_i;
 	// return if we're still choosing camps
-	if(turn <= -1 && game_state.my_id != my_id) return; // don't override our cards when choosing camps
+//	if(turn <= -1 && turn > -3 && game_state.my_id != my_id) return; // don't override our cards when choosing camps
 	them.board.cards    = game_state.pile_cards[7];
 	them.events.cards   = game_state.pile_cards[8];
 	them.hand.cards     = game_state.pile_cards[9];
@@ -980,7 +982,7 @@ function ApplyGameState(game_state) {
 		temp_pile.card_states = [];
 	}
 	// if recent game state send was the end of a turn and its now our turn start it
-	if(game_state.end_of_turn && turn % 2 == my_id)
+	if(game_state.end_of_turn && turn % 2 == my_id && turn >= 0)
 		start_turn();
 	// view their timer when not our turn
 	if(turn % 2 != my_id)
@@ -1091,7 +1093,7 @@ function end_turn() {
 	// auto-use unspent water
 	while(p1.water >= 2) on_click_basic(p1.basics, 0);
 	if(p1.water == 1) on_click_basic(p1.basics, 1);
-	if(turn <= -1) {
+	if(turn <= -1 && turn > -3) {
 		var empty_camps = 0;
 		for(var i = 6; i < 9; i++) {
 			if(p1.board.cards[i] == empty_i) {
@@ -1110,13 +1112,13 @@ function end_turn() {
 		}
 		// clear camp cards from hand
 		p1.hand.cards = [];
-		p2.hand.cards = [];
+//		p2.hand.cards = [];
 	}
 	turn++;
 	if(is_logging) console.log("sending at end of turn: ");
 	prev_sound_played_i = -1;
 	SendGameState(true);
-	if(turn % 2 == my_id)
+	if(turn >= 0 && turn % 2 == my_id)
 		start_turn();
 }
 
@@ -1160,7 +1162,7 @@ function Update() {
 	if(my_turn) {
 		DoButton("Restart Turn", restart_turn, mat_endx + 10, 140, card_width * 2 + 10, card_width);
 	}
-	if(!is_resolving() && (turn <= -1 || my_turn) && !(turn == -1 && p1.hand.cards.length == 0)) {
+	if(!is_resolving() && (turn <= -1 || my_turn) && !(turn == -1 && p1.hand.cards.length == 0) && !(turn <= -3 && p2.hand.cards.length == 6)) {
 		DoButton("End Turn", end_turn, mat_endx + 10, 140 + card_width + 10, card_width * 2 + 10, card_width);
 	}
 	if(innerHeight != screen.height)
@@ -1189,7 +1191,15 @@ function Update() {
 	}
 	else if(!isNaN(my_id)) {
 		DrawRect(mat_endx, temp_yoff, canvas.width - mat_endx, card_height, "grey");
-		DrawText("Player 0 Hand:", mat_endx, temp_yoff - 12, 24, "white");
+		if(experimental_on) {
+			DrawText("Other Player Hand:", mat_endx, temp_yoff - 12, 24, "white");
+			if(turn <= -3 && p2.hand.cards.length > 6) {
+				status_text = "Discard a camp from the other player's hand";
+				click_pile(p2.hand, mat_endx, temp_yoff, (pile, i) => {move_card(pile, i, null, 0);end_turn();status_text = "pick your camps";});
+			}
+		}
+		else
+			DrawText("Player 0 Hand:", mat_endx, temp_yoff - 12, 24, "white");
 		render_pile(p2.hand, mat_endx, temp_yoff);
 		scroll_pile(p2.hand, mat_endx, temp_yoff, mat_endx + temp_width, temp_yoff + card_height);
 	}
@@ -1208,10 +1218,12 @@ function Update() {
 	if(!isNaN(my_id))
 		render_pile(p1.hand, mat_endx, canvas.height - card_height);
 	scroll_pile(p1.hand, mat_endx, canvas.height - card_height, canvas.width, canvas.height);
-	if((!is_resolving() || estack[0].cur_effect == 'c' || estack[0].cur_effect == 'j'))
+	if(turn > -3 && (!is_resolving() || estack[0].cur_effect == 'c' || estack[0].cur_effect == 'j'))
 		drag_from_pile(p1.hand, mat_endx, canvas.height - card_height);
 
 	// render hovered card on top of temp, discard, and hand
+	if(turn <= -3)
+		hover_pile(p2.hand, mat_endx, temp_yoff);
 	hover_pile(temp_pile, mat_endx, temp_yoff);
 	hover_pile(discard_pile, mat_endx, discard_yoff);
 	hover_pile(p1.hand, mat_endx, canvas.height - card_height);
@@ -1281,6 +1293,11 @@ function Update() {
 				while(estack[0].to_send[i] != ')') i++;
 				cur_mods = estack[0].to_send.substring(start_i, i);
 			}
+		}
+		// no help text if not waiting on a response and nothing in temp
+		else if(temp_pile.cards.length == 0) {
+			status_text = "";
+			break;
 		}
 
 		     if(cur_effect == 'w') help_text += "gain an extra water";
@@ -2429,6 +2446,8 @@ function hover_pile(pile, pileX, pileY, reverse_order) {
 			if(card == null) continue;
 			if((pile.card_states[j] & FLIPPED) && !is_camp(pile, j)) continue;
 			var s = hovered_card_scale;
+			if(turn <= -3)
+				s = 3.5;
 			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i,
 				canvas.width - card_width*s, 0, card_width*s, card_height*s, pile.cards[j] < punk_i ? 10 : 1);
 		}
@@ -2550,19 +2569,20 @@ function move_card(from, from_i, to, to_i) {
 		if(from.uses_card_states)
 			from.card_states.splice(from_i, 1);
 	}
-	// either set or splice in card to dest
-	if(to.always_full) {
-		to.cards[to_i] = card;
-		if(to.uses_card_states)
-			to.card_states[to_i] = card_state;
-	}
-	else {
-		to.cards.splice(to_i, 0, card);
-		if(to.uses_card_states)
-			to.card_states.splice(to_i, 0, card_state);
+	if(to != null) { // either set or splice in card to dest
+		if(to.always_full) {
+			to.cards[to_i] = card;
+			if(to.uses_card_states)
+				to.card_states[to_i] = card_state;
+		}
+		else {
+			to.cards.splice(to_i, 0, card);
+			if(to.uses_card_states)
+				to.card_states.splice(to_i, 0, card_state);
+		}
 	}
 	// update game state
-	if(turn >= 0 && !starting_turn && to != dragging_pile && to != temp_pile && !is_resolving()) {
+	if((turn >= 0 || turn <= -3) && !starting_turn && to != dragging_pile && to != temp_pile && !is_resolving()) {
 		if(is_logging) console.log("sending after card move: ");
 		SendGameState();
 	}
