@@ -1294,8 +1294,8 @@ function Update() {
 				cur_mods = estack[0].to_send.substring(start_i, i);
 			}
 		}
-		// no help text if not waiting on a response and nothing in temp
-		else if(temp_pile.cards.length == 0) {
+		// no help text if nothing in temp
+		if(temp_pile.cards.length == 0) {
 			status_text = "";
 			break;
 		}
