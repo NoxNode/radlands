@@ -1,6 +1,12 @@
 /*
------- gameplay bugs -----
+------ saved games -----
+ApplyGameState({"packet_sequence_num":77,"my_id":0,"water":0,"turn":7,"pile_cards":[[62,63,52,43,46,70,52,72,44,59,69,55,47,48,49,72,51,49,67,74,48,66,73,65,69,73,71,68,64,56,57,40,50,54,58,60,53,74,44,45,55,58,54,39,57,51,67],[41,61,42,53,68,43,71],[3,0,-1],[-1,41,-1,40,42,-1,21,22,36],[-1,1,-1],[56,70,39],[2,0,1],[-1,50,-1,47,46,-1,20,35,24],[-1,-1,-1],[66,65,45]],"pile_card_states":[[0,1,0,1,130,0,129,1,128],[0,1,0,128,128,0,128,128,130]],"end_of_turn":false,"estack":[{"str":"2d(1m)","i":6,"self_pile":{"cards":[3,0,1],"card_states":[0,0,0],"uses_card_states":false,"scrollX":0,"scrollXStart":0,"scrolling":false,"always_full":true,"max_cols":1,"max_cards":3,"xdiff":138,"ydiff":147,"card_width":90,"card_height":130},"self_i":2,"prev_target_pile":null,"prev_target_i":null,"cur_effect":"2","mods":"","any_num":-1,"resolving_any_num":false,"success":false,"received":null,"to_send":"d(1m)","my_num_in_temp":0,"prev_total_in_temp":0}],"response":true,"event_resolved_this_turn":true,"event_played_this_turn":false,"ability_used_this_turn":false,"p0_raiders_resolved_this_turn":false,"p0_high_ground_resolved_this_turn":false,"p1_raiders_resolved_this_turn":true,"p1_high_ground_resolved_this_turn":false,"people_placed_this_turn":0,"prev_sound_played_i":2,"turn_time_left":""});SendGameState(false, true);
+ApplyGameState({"packet_sequence_num":108,"my_id":0,"water":3,"turn":8,"pile_cards":[[53,41,71,65,72,63,47,71,60,70,66,73,68,65,44,56,47,41,72,57,56,64,40,70,45,67,48,51,46,74,43,45,42,49],[62,39,57,50,39,67,46,53,58,40,61,59,69,68,52,43,73,69,66,50,54],[2,0,1],[-1,42,-1,49,44,54,37,19,33],[-1,-1,-1],[52,51],[3,-1,1],[74,-1,55,48,58,55,34,38,12],[-1,-1,-1],[0]],"pile_card_states":[[0,128,0,128,1,128,130,128,128],[130,0,2,130,0,0,1,130,128]],"estack":[],"event_resolved_this_turn":false,"event_played_this_turn":false,"ability_used_this_turn":false,"p0_raiders_resolved_this_turn":false,"p0_high_ground_resolved_this_turn":false,"p1_raiders_resolved_this_turn":false,"p1_high_ground_resolved_this_turn":false,"people_placed_this_turn":0,"prev_sound_played_i":-1,"turn_time_left":""});SendGameState(undefined, undefined);
 
+------ gameplay bugs -----
+famine bug, state (band-aided):
+ApplyGameState({"packet_sequence_num":408,"my_id":1,"water":4,"turn":35,"pile_cards":[[55,71,60,49,63,67,71,41,45,48,72,74,54,49,66,55,66,47,69,61,67,58,39,50,69,56,50,52,39,46,42,73,43,41,56,46,48,73,70,74,40,68,65,45,42,40,44,44,70,59,57,53,53,54,65],[58,68,51],[2,0,1],[-1,-1,-1,-1,-1,52,6,28,14],[-1,-1,-1],[64],[3,-1,-1],[-1,57,43,-1,72,47,37,22,10],[-1,1,-1],[0,62,51]],"pile_card_states":[[0,0,0,0,0,128,129,130,130],[0,130,130,0,130,128,130,130,1]],"estack":[{"str":"{?(fp)/k(1p)?(fp)}2{?(fp)/k(1p)?(fp)}","i":37,"self_pile":{"cards":[58,68,51],"card_states":[],"uses_card_states":false,"scrollX":4.9007812499986585,"scrollXStart":4.9007812499986585,"scrolling":false,"always_full":false,"max_cols":9001,"max_cards":9001,"xdiff":90,"ydiff":130,"card_width":90,"card_height":130},"self_i":0,"prev_target_pile":{"cards":[-1,-1,-1,-1,-1,52,6,28,14],"card_states":[0,0,0,0,0,128,129,130,130],"uses_card_states":true,"scrollX":0,"scrollXStart":0,"scrolling":false,"always_full":true,"max_cols":3,"max_cards":9,"xdiff":138,"ydiff":147,"card_width":90,"card_height":130},"prev_target_i":2,"cur_effect":"2","mods":"","any_num":-1,"resolving_any_num":false,"success":true,"received":null,"to_send":"{?(fp)/k(1p)?(fp)}","my_num_in_temp":0,"prev_total_in_temp":0}],"event_resolved_this_turn":true,"event_played_this_turn":false,"ability_used_this_turn":false,"p0_raiders_resolved_this_turn":false,"p0_high_ground_resolved_this_turn":false,"p1_raiders_resolved_this_turn":false,"p1_high_ground_resolved_this_turn":false,"people_placed_this_turn":0,"prev_sound_played_i":14,"turn_time_left":107});SendGameState(undefined, undefined);
+mobile double-clicks end turn sometimes
 
 ------ visual/audio bugs -----
 shouldn't be able to scroll such that nothing is visible
@@ -704,6 +710,7 @@ var oc_scale      = 3;
 var sounds        = [];
 var prev_sound    = null;
 var game_over     = false;
+var is_mobile     = false;
 
 function Init() {
 	// connect to server and set up listeners
@@ -2331,7 +2338,6 @@ function drag_to_pile(pile, pileX, pileY, on_drag, endx, endy, reverse_order) {
 				}
 				else {
 					SendGameState(false, true);
-					estack = [];
 				}
 			}
 			else
@@ -2397,8 +2403,8 @@ function render_pile(pile, pileX, pileY, reverse_order) {
 		var deg = 0;
 		if(pile.card_states[j] & HARMED)
 			deg = 90;
-		// previous render method (didn't smoothly scale down)
-		if(card.id >= effects_start_i) { // still apply the no-smooth to effects cuz they're small to begin with and transparent
+		// previous render method (didn't smoothly scale down) - apply to effects or on mobile
+		if(card.id >= effects_start_i || scaledCanvas.height > scaledCanvas.width || is_mobile) {
 			render_cropped_card(card.row_i, card.col_i, card.dims, card.img_i, pileX + xdiff + pile.scrollX, pileY + ydiff, pile.card_width, pile.card_height, 0, deg);
 		}
 		else {
@@ -2744,6 +2750,7 @@ function main() {
 		}
 	});
 	addEventListener("touchstart", function(e) {
+		is_mobile = true;
 		var touch_i = 0;
 		if(e.touches.length > 1) touch_i = e.touches.length - 1;
 		if(scaledCanvas.width > scaledCanvas.height) {
