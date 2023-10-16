@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
 
 		if(url == null || url.length < 5) return;
 		// handle matchmaking
-		if(url.includes("match") || url.includes("timed")) {
+		if(url.endsWith("match") || url.endsWith("timed")) {
 			if(waiting_for_match == null) {
 				waiting_for_match = socket;
 				socket.emit("chat", "waiting for opponent...");

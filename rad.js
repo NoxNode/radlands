@@ -747,11 +747,10 @@ function Init() {
 		var img = document.getElementById("img" + i);
 		if(img == null) break;
 		if(experimental_on && i >= 2 && i <= 7) {
-			img.src = img.src.replace("/", "/ex_");
-			imgs.push(img);
+			var last_slash_i = img.src.lastIndexOf("/");
+			img.src = img.src.substring(0, last_slash_i) + "/ex_" + img.src.substring(last_slash_i + 1, img.src.length);
 		}
-		else
-			imgs.push(img);
+		imgs.push(img);
 	}
 	// fill sounds array
 	for(var i = 0; i < sound_urls.length; i++) {
@@ -777,8 +776,10 @@ function Init() {
 	if(experimental_on) {
 		// allow restoring enemies and damaging own cards
 		for(var i = 0; i < cards.length; i++) {
+			var card = cards[i];
 			if(card.abilities == null) continue;
 			for(var j = 0; j < card.abilities.length; j++) {
+				if(card.abilities[j] == null) continue;
 				card.abilities[j].effect = card.abilities[j].effect.replace("d(2", "d(");
 				card.abilities[j].effect = card.abilities[j].effect.replace("i(2", "i(");
 				card.abilities[j].effect = card.abilities[j].effect.replace("r(1", "r(");
