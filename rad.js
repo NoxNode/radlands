@@ -616,7 +616,7 @@ var cards = [
 	{id: 35, name: "Transplant Lab",    abilities: [{cost: 1, effect: "?(mp)::r(1c)"}],                         initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 0},
 	{id: 36, name: "Command Post",      abilities: [{cost: 3, effect: "d(2uc)"}],                               initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 0, col_i: 1},
 	{id: 37, name: "Construction Yard", abilities: [{cost: 1, effect: "?(sy)::f(1nm)m(i)k(s)"}],                initial_draw: 2, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 0},
-	{id: 38, name: "Obelisk",           abilities: [],                                                          initial_draw: 3, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 1},
+	{id: 38, name: "Obelisk",           abilities: [],                                       initial_damage: 2, initial_draw: 3, img_i: camps3_i,  dims: camps3_dims,  row_i: 1, col_i: 1},
 	// people1
 	{id: 39, name: "Mimic",             abilities: [{cost: 0, effect: "?(y)::b(yp)"}],                          play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 0},
 	{id: 40, name: "Wounded Soldier",   abilities: [{cost: 1, effect: "d(2uc)"},null,{effect:"td(s)"}],         play_cost: 1, junk: JUNK_INJUR  , img_i: people1_i, dims: people1_dims, row_i: 0, col_i: 1},
@@ -685,6 +685,7 @@ var estack              = []; // effect stack
 var packet_sequence_num = 0;
 var prev_game_state     = null;
 var sent_effect         = false;
+var experimental_on     = false;
 
 // this_turn trackers                             currently applies to:
 var event_resolved_this_turn          = false; // watchtower
@@ -729,28 +730,34 @@ function Init() {
 		console.log(chat_msg);
 		status_text = chat_msg;
 	});
+	// send connection packet to server and apply random seed
+	var url = window.location.href;
+	applySeed(url.substring(0, url.length-1));
+	my_id = Number(url[url.length-1]);
+	timer_enabled = url.includes("timed");
+	experimental_on = url.includes("ex");
+	socket.emit("con", url);
+	// init offscreen canvas and context for an intermediate for drawing cards for smooth scaling
+	oc = document.createElement("canvas");
+	octx = oc.getContext("2d");
+	oc.width = card_width * oc_scale;
+	oc.height = card_width * oc_scale;
 	// fill imgs array
 	for(var i = 0; ; i++) {
 		var img = document.getElementById("img" + i);
 		if(img == null) break;
-		imgs.push(img);
+		if(experimental_on && i >= 2 && i <= 7) {
+			img.src = img.src.replace("/", "/ex_");
+			imgs.push(img);
+		}
+		else
+			imgs.push(img);
 	}
 	// fill sounds array
 	for(var i = 0; i < sound_urls.length; i++) {
 		sounds.push(new Audio(sound_urls[i]));
 		sounds[sounds.length - 1].volume = 0.2;
 	}
-	// init offscreen canvas and context for an intermediate for drawing cards for smooth scaling
-	oc = document.createElement("canvas");
-	octx = oc.getContext("2d");
-	oc.width = card_width * oc_scale;
-	oc.height = card_width * oc_scale;
-	// send connection packet to server and apply random seed
-	var url = window.location.href;
-	applySeed(url.substring(0, url.length-1));
-	my_id = Number(url[url.length-1]);
-	timer_enabled = url.includes("/?timed");
-	socket.emit("con", url);
 	// create global piles
 	draw_pile     = new_pile();
 	discard_pile  = new_pile(false, false, null, null, card_width, card_height);
@@ -766,6 +773,48 @@ function Init() {
 		p.events = new_pile(false, true, 1, 3);
 		p.hand   = new_pile(false, false, null, null, card_width, card_height);
 	}
+	// do experimental changes
+	if(experimental_on) {
+		// allow restoring enemies and damaging own cards
+		for(var i = 0; i < cards.length; i++) {
+			if(card.abilities == null) continue;
+			for(var j = 0; j < card.abilities.length; j++) {
+				card.abilities[j].effect = card.abilities[j].effect.replace("d(2", "d(");
+				card.abilities[j].effect = card.abilities[j].effect.replace("i(2", "i(");
+				card.abilities[j].effect = card.abilities[j].effect.replace("r(1", "r(");
+			}
+		}
+		// initial draw changes (and initial damage)
+		cards[6].initial_draw = 1;    // octagon (maybe 2 cost k(2up) instead of 2k(1p))
+		cards[6].initial_damage = 1;  // octagon
+		cards[9].initial_draw = 1;    // rail gun
+		cards[9].initial_damage = 1;  // rail gun
+		cards[13].initial_draw = 1;   // mulcher
+		cards[13].initial_damage = 1; // mulcher
+		cards[16].initial_draw = 2;   // blood bank
+		cards[16].initial_damage = 1; // blood bank
+		cards[20].initial_damage = 1; // nest of spies
+		cards[21].initial_damage = 1; // omen clock
+		cards[24].initial_damage = 1; // oasis
+		cards[27].initial_damage = 1; // parachute base
+		cards[35].initial_draw = 1;   // transplant lab
+		cards[36].initial_draw = 1;   // command post
+		// people play and ability cost changes
+		cards[59].play_cost = 2; // vera vosh
+		cards[64].play_cost = 2; // karli blaze
+		cards[64].abilities[0].cost = 2; // karli blaze
+		// people junk changes
+		cards[55].junk = JUNK_WATER;   // sniper
+		cards[52].junk = JUNK_RESTORE; // looter
+		cards[57].junk = JUNK_WATER;   // repair bot
+		cards[53].junk = JUNK_INJUR;   // scout
+		cards[43].junk = JUNK_DRAW;    // pyromaniac
+		// events junk changes
+		cards[65].junk = JUNK_DRAW;    // high ground
+		cards[70].junk = JUNK_WATER;   // strafe
+		cards[67].junk = JUNK_INJUR;   // interrogate
+		cards[71].junk = JUNK_WATER;   // truce
+	}
 	// init draw pile
 	for(var i = people_start_i; i < effects_start_i; i++) {
 		var card = cards[i];
@@ -776,12 +825,13 @@ function Init() {
 	shuffle(draw_pile.cards);
 	// init camp pile
 	for(var i = camps_start_i; i < people_start_i; i++) {
-		//if(cards[i].name == "Juggernaut") continue;
 		camp_pile.cards.push(i);
 	}
 	shuffle(camp_pile.cards);
-	// deal 6 camps to each player
-	for(var i = 0; i < 6; i++) {
+	// deal camps to each player
+	var num_camps = 6;
+	if(experimental_on) num_camps = 7;
+	for(var i = 0; i < num_camps; i++) {
 		if(my_id == 1) {
 			move_card(camp_pile, 0, p2.hand, 0);
 			move_card(camp_pile, 0, p1.hand, 0);
@@ -1042,22 +1092,21 @@ function end_turn() {
 	if(p1.water == 1) on_click_basic(p1.basics, 1);
 	if(turn <= -1) {
 		var empty_camps = 0;
-		var obelisk_spot = -1;
 		for(var i = 6; i < 9; i++) {
 			if(p1.board.cards[i] == empty_i) {
 				empty_camps += 1;
 				continue;
 			}
-			if(cards[p1.board.cards[i]].name == "Obelisk")
-				obelisk_spot = i;
 		}
 		if(empty_camps != 0) {
 			status_text = "pick your camps!";
 			return;
 		}
-		// destroy obelisk
-		if(obelisk_spot != -1)
-			p1.board.card_states[obelisk_spot] = FLIPPED;
+		// deal initial damage to camps
+		for(var i = 6; i < 9; i++) {
+			if(cards[p1.board.cards[i]].initial_damage != null)
+				p1.board.card_states[i] = cards[p1.board.cards[i]].initial_damage;
+		}
 		// clear camp cards from hand
 		p1.hand.cards = [];
 		p2.hand.cards = [];
@@ -1119,7 +1168,7 @@ function Update() {
 		DoButton("Windowed", () => document.exitFullscreen(), mat_endx + 10, 140 + card_width * 2 + 20, card_width * 2 + 10, card_width);
 
 	// Temp or Player 0 Hand (for spectators)
-	if(my_id == 0 || my_id == 1) {
+	if((my_id == 0 || my_id == 1) && !(experimental_on && turn < 0)) {
 		var temp_width = canvas.width;
 		var draggable_end_i = -1;
 		if(is_resolving()) {
@@ -2105,7 +2154,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 		if(cur_mods.includes('2') && tp != p2) return false;
 		if(cur_mods.includes('p') && !is_person(pile, i)) return false;
 		if(cur_mods.includes('m') && !is_camp(pile, i)) return false;
-		if(cur_mods.includes('u') && is_protected(pile, i)) return false;
+		if(cur_mods.includes('u') && is_protected(pile, i) && !(experimental_on && pile == p1.board && (card.id == injur_effect_i || card.id == damage_effect_i))) return false;
 		if(cur_mods.includes('d') && (pile.card_states[i] & 3) != HARMED) return false;
 		if(cur_mods.includes('y') && (pile.card_states[i] & 3) != UNHARMED) return false;
 		if(cur_mods.includes('y') && pile == p1.board && !(pile.card_states[i] & READY)) return false;
@@ -2123,7 +2172,7 @@ function on_drag_to_board(pile, i, where_on_card, effect_only) {
 			if(!damage_card(pile, i, false, true)) return false;
 		}
 		if(card.id == restore_effect_i) {
-			if(pile != p1.board) return false;
+//			if(pile != p1.board && !experimental_on) return false;
 			if(!damage_card(pile, i, false, false, true)) return false;
 		}
 		if(card.id == flip_effect_i) {
