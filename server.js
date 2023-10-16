@@ -24,7 +24,7 @@ var lobbies = {};
 var sock_to_seed = {};
 // matchmaking lobbies
 var waiting_for_match = null;
-var matches = 88;
+var matches = 107;
 // timing stuff to free up memory when server is idle for a long time
 function secs_since_epoch() {
 	return Math.floor(Date.now() / 1000);
