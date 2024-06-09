@@ -5,9 +5,9 @@
 ## links
 - buy the official, physical card game: <https://roxley.com/products/radlands>
 - rulebook pdf: <https://cdn.shopify.com/s/files/1/0246/2190/8043/files/Radlands_-_Rulebook_v1.2_-_2023-05-26.pdf?v=1685137340>
-- google cloud server (match-making): <http://34.83.89.6:8080/?match>
-- google cloud server (2 minute timed match-making): <http://34.83.89.6:8080/?timed>
-- google cloud server (custom lobby): <http://34.83.89.6:8080/?test0>
+- google cloud server (match-making): <http://[server_ip]:8080/?match>
+- google cloud server (2 minute timed match-making): <http://[server_ip]:8080/?timed>
+- google cloud server (custom lobby): <http://[server_ip]:8080/?test0>
 
 ## notes
 - custom lobbies: the last digit of the above url is the player id (0 for first, 1 for second - can spectate by using 2-9)
